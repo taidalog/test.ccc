@@ -295,3 +295,6 @@ __pycache__/
 
 # Visual Studio Code workspace
 *.code-workspace
+
+# From Fable 4.5.0
+src/fable_modules
