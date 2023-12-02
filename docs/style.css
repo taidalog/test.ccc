@@ -73,3 +73,42 @@ div.message-area {
     font-size: 6rem;
     text-align: center;
 }
+
+footer {
+    color: #888888;
+    width: 90%;
+    margin: 20px auto;
+    margin-top: 40px;
+}
+
+footer>div {
+    margin: 10px 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+footer a {
+    color: #447f88;
+    text-decoration: none;
+}
+
+footer a:visited {
+    color: #754488;
+}
+
+@media (max-width: 799px) {
+    footer {
+        margin-top: 20px;
+    }
+
+    footer>div {
+        width: 100%;
+        margin: 0 auto;
+        flex-direction: column;
+    }
+
+    footer div.footer-item {
+        margin: 0 auto;
+    }
+}
