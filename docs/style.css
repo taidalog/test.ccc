@@ -58,7 +58,7 @@ main>form>label {
 
 div.timer-area {
     font-family: 'Noto Sans Mono', monospace;
-    font-size: 4rem;
+    font-size: 12rem;
     font-weight: 500;
     text-align: center;
 }
@@ -70,6 +70,6 @@ div.timer-area {
 }
 
 div.message-area {
-    font-size: 3rem;
+    font-size: 6rem;
     text-align: center;
 }
