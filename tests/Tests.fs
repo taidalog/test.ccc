@@ -147,18 +147,20 @@ let ``Command.parseInput-3`` () =
 
 [<Fact>]
 let ``Command.parse-1`` () =
-    let expected = Action.CountDown(TimeSpan(0, 5, 0), "#333333", "#ffffff", "hey;")
+    let expected = Command.CountDown(TimeSpan(0, 5, 0), "#333333", "#ffffff", "hey;")
     let actual = parse "down 5:00 -m hey;"
     Assert.Equal(expected, actual)
 
 [<Fact>]
 let ``Command.parse-2`` () =
-    let expected = Action.CountUp(TimeSpan(0, 0, 30), "#123456", "#ffffff", "hey hey")
+    let expected = Command.CountUp(TimeSpan(0, 0, 30), "#123456", "#ffffff", "hey hey")
     let actual = parse "up 0:30 -c #123456 -m hey hey"
     Assert.Equal(expected, actual)
 
 [<Fact>]
 let ``Command.parse-3`` () =
-    let expected = Action.CountDown(TimeSpan(0, 2, 0), "#333333", "#ff0000", "ho ho ho")
+    let expected =
+        Command.CountDown(TimeSpan(0, 2, 0), "#333333", "#ff0000", "ho ho ho")
+
     let actual = parse "down 120 --background #ff0000 --message ho ho ho"
     Assert.Equal(expected, actual)
