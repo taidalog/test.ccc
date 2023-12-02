@@ -17,15 +17,9 @@ module Timer' =
 
     type TimeAcc = { StartTime: DateTime; Acc: TimeSpan }
 
-    type Notes =
-        { Finished: (int * string) list
-          NotFinished: (int * string) list }
-
     type State =
         { Stop: TimeAcc
-          Next: TimeAcc
           IntervalId: int
-          Notes: Notes
           RunningStatus: RunningStatus }
 
     [<Emit("setInterval($0, $1)")>]
@@ -38,11 +32,14 @@ module Timer' =
         { Stop =
             { StartTime = DateTime.MinValue
               Acc = TimeSpan.Zero }
-          Next =
+          IntervalId = -1
+          RunningStatus = RunningStatus.NotStarted }
+
+    let initState =
+        { Stop =
             { StartTime = DateTime.MinValue
               Acc = TimeSpan.Zero }
           IntervalId = -1
-          Notes = { Finished = []; NotFinished = [] }
           RunningStatus = RunningStatus.NotStarted }
 
     let timeSpanToDisplay (timeSpan: TimeSpan) =
@@ -52,12 +49,32 @@ module Timer' =
         let ms = timeSpan.Milliseconds |> string |> String.padLeft 3 '0'
         $"%s{h}:%s{m}:%s{s}.%s{ms}"
 
-    let countUp () =
+    let countDown (for': TimeSpan) (till: TimeSpan) : unit =
+        let intervalId =
+            setInterval
+                (fun _ ->
+                    let elapsedTime = for' - (DateTime.Now - state.Stop.StartTime + state.Stop.Acc)
+
+                    if elapsedTime < till then
+                        document.getElementById("timerArea").innerText <- timeSpanToDisplay TimeSpan.Zero
+                        clearInterval state.IntervalId
+                    else
+                        document.getElementById("timerArea").innerText <- timeSpanToDisplay elapsedTime)
+                10
+
+        state <- { state with IntervalId = intervalId }
+
+    let countUp (from': TimeSpan) (till: TimeSpan) : unit =
         let intervalId =
             setInterval
                 (fun _ ->
                     let elapsedTime = DateTime.Now - state.Stop.StartTime + state.Stop.Acc
-                    document.getElementById("timer").innerText <- timeSpanToDisplay elapsedTime)
+
+                    if elapsedTime > till then
+                        document.getElementById("timerArea").innerText <- timeSpanToDisplay till
+                        clearInterval state.IntervalId
+                    else
+                        document.getElementById("timerArea").innerText <- timeSpanToDisplay elapsedTime)
                 10
 
         state <- { state with IntervalId = intervalId }
@@ -65,11 +82,31 @@ module Timer' =
     let invoke (action: Action) =
         match action with
         | Action.CountDown(time, color, bgcolor, message) ->
+            let now = DateTime.Now
+
+            state <-
+                { initState with
+                    Stop =
+                        { initState.Stop with
+                            StartTime = now
+                            Acc = TimeSpan.MinValue }
+                    RunningStatus = RunningStatus.Running }
+
             document.body.setAttribute ("style", (sprintf "color: %s; background-color: %s;" color bgcolor))
-            (document.getElementById "timerArea").innerText <- timeSpanToDisplay time
+            countDown time TimeSpan.Zero
             (document.getElementById "messageArea").innerText <- message
         | Action.CountUp(time, color, bgcolor, message) ->
+            let now = DateTime.Now
+
+            state <-
+                { initState with
+                    Stop =
+                        { initState.Stop with
+                            StartTime = now
+                            Acc = TimeSpan.MinValue }
+                    RunningStatus = RunningStatus.Running }
+
             document.body.setAttribute ("style", (sprintf "color: %s; background-color: %s;" color bgcolor))
-            (document.getElementById "timerArea").innerText <- timeSpanToDisplay time
+            countUp TimeSpan.Zero time
             (document.getElementById "messageArea").innerText <- message
         | Action.Invalid -> ()
