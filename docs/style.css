@@ -140,13 +140,59 @@ footer a:visited {
     }
 }
 
+/*
+    help window
+*/
 span.help-button,
 span.help-close {
     font-size: 24px;
     cursor: pointer;
 }
 
+div.help-close-outer {
+    width: 100%;
+    text-align: right;
+}
+
+div.help-window {
+    display: none;
+}
+
+div.help-window.active {
+    display: block;
+    background-color: #ffffff;
+    opacity: 0.95;
+    width: fit-content;
+    height: fit-content;
+    max-width: 80%;
+    max-height: 60%;
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin: auto;
+    padding: 0.5rem 2rem 2rem 2rem;
+    box-shadow: 0px 0px 5px 1px #999;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+div.help-window a {
+    color: #447f88;
+}
+
+div.help-window a:visited {
+    color: #754488;
+}
+
 span.material-symbols-outlined:hover {
     font-variation-settings:
         'FILL' 1
+}
+
+span.material-symbols-outlined.help-close:hover {
+    color: #ffffff;
+    background-color: #444444;
 }
