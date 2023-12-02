@@ -33,6 +33,19 @@ footer {
     margin: 0 auto;
 }
 
+header {
+    width: 90%;
+    height: 50px;
+    margin: auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+header>div {
+    margin-top: auto;
+}
+
 main {
     padding: 10px 0;
     flex-grow: 1;
@@ -119,4 +132,15 @@ footer a:visited {
     footer div.footer-item {
         margin: 0 auto;
     }
+}
+
+span.help-button,
+span.help-close {
+    font-size: 24px;
+    cursor: pointer;
+}
+
+span.material-symbols-outlined:hover {
+    font-variation-settings:
+        'FILL' 1
 }
