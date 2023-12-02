@@ -14,23 +14,33 @@ open Timer'
 
 module App =
     let keyboardshortcut (e: KeyboardEvent) =
-        let helpWindow = document.getElementById "helpWindow"
-
-        let isHelpWindowActive =
-            helpWindow.classList
-            |> (fun x -> JS.Constructors.Array?from(x))
-            |> Array.contains "active"
-
         match document.activeElement.id with
         | "commandInput" ->
             match e.key with
             | "Escape" -> (document.getElementById "commandInput").blur ()
             | _ -> ()
         | _ ->
+            let helpWindow = document.getElementById "helpWindow"
+
+            let isHelpWindowActive =
+                helpWindow.classList
+                |> (fun x -> JS.Constructors.Array?from(x))
+                |> Array.contains "active"
+
+            let informationPolicyWindow = document.getElementById "informationPolicyWindow"
+
+            let isInformationPolicyWindowActive =
+                informationPolicyWindow.classList
+                |> (fun x -> JS.Constructors.Array?from(x))
+                |> Array.contains "active"
+
             match e.key with
             | "Escape" ->
                 if isHelpWindowActive then
                     helpWindow.classList.remove "active"
+
+                if isInformationPolicyWindowActive then
+                    informationPolicyWindow.classList.remove "active"
             | "?" ->
                 if not isHelpWindowActive then
                     helpWindow.classList.add "active"
@@ -42,6 +52,7 @@ module App =
     window.addEventListener (
         "DOMContentLoaded",
         (fun _ ->
+            // timer feature
             let commandInput = document.getElementById "commandInput" :?> HTMLInputElement
 
             (document.getElementById "inputArea").onsubmit <-
@@ -56,10 +67,21 @@ module App =
                     commandInput.value |> splitInput' |> Array.map parse |> Array.toList |> start
                     false
 
+            // help window
             [ "helpButton"; "helpClose" ]
             |> List.iter (fun x ->
                 (document.getElementById x :?> HTMLButtonElement).onclick <-
-                    fun _ -> (document.getElementById "helpWindow").classList.toggle "active" |> ignore)
+                    fun _ -> (document.getElementById "helpWindow").classList.toggle "active")
 
+            // information policy window
+            (document.getElementById "informationPolicyLink").onclick <-
+                fun event ->
+                    event.preventDefault ()
+                    (document.getElementById "informationPolicyWindow").classList.add "active"
+
+            (document.getElementById "informationPolicyClose").onclick <-
+                fun _ -> (document.getElementById "informationPolicyWindow").classList.remove "active"
+
+            // keyboard shortcut
             document.onkeydown <- fun (e: KeyboardEvent) -> keyboardshortcut e)
     )
