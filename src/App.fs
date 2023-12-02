@@ -1,10 +1,9 @@
 namespace Ccc
 
-open Fable.Core
-open Fable.Core.JsInterop
 open Browser.Dom
 open Browser.Types
 open Command
+open Timer'
 
 module App =
     let keyboardshortcut (e: KeyboardEvent) =
@@ -27,22 +26,13 @@ module App =
 
             (document.getElementById "inputArea").onsubmit <-
                 fun _ ->
-                    printfn "%s" commandInput.value
-
                     commandInput.value
                     |> splitInput'
                     |> Array.map (parse >> string)
                     |> Array.iter (printfn "%s")
 
-                    commandInput.value
-                    |> splitInput'
-                    |> Array.map (parse >> string)
-                    |> String.concat "\n"
-                    |> fun x -> (document.getElementById "outputArea").innerText <- x
-
+                    commandInput.value |> splitInput' |> Array.map parse |> Array.head |> invoke
                     false
 
-            document.onkeydown <- fun (e: KeyboardEvent) -> keyboardshortcut e
-
-        )
+            document.onkeydown <- fun (e: KeyboardEvent) -> keyboardshortcut e)
     )
