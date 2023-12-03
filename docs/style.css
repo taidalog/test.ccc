@@ -1,0 +1,206 @@
+/*
+  ccc Version 0.1.0
+  https://github.com/taidalog/ccc
+  Copyright (c) 2023 taidalog
+  This software is licensed under the MIT License.
+  https://github.com/taidalog/ccc/blob/main/LICENSE
+*/
+html,
+body {
+    height: 100%;
+    margin: 0;
+}
+
+html {
+    font-family: 'Noto Sans JP', sans-serif;
+    font-weight: 400;
+    color: #444444;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+}
+
+h1 {
+    color: #65a2ac;
+    font-family: 'Zen Kurenaido', sans-serif;
+    margin: 0;
+}
+
+h2 {
+    margin: 0;
+    color: lightslategray;
+}
+
+header,
+main,
+footer {
+    width: 90%;
+    margin: 0 auto;
+}
+
+header {
+    width: 90%;
+    height: 50px;
+    margin: auto;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+}
+
+header>div {
+    margin-top: auto;
+}
+
+main {
+    padding: 10px 0;
+    flex-grow: 1;
+}
+
+main>form {
+    font-family: 'Noto Sans Mono', monospace;
+    font-size: 1.25rem;
+    width: calc(100% - 15px);
+    color: #ffffff;
+    background-color: #444444;
+    border-radius: 10px;
+    padding: 5px 5px 5px 10px;
+}
+
+main>form>input {
+    font-family: 'Noto Sans Mono', monospace;
+    font-size: 1.25rem;
+    padding: 1%;
+    width: 95%;
+    color: #ffffff;
+    background-color: #444444;
+    border: none;
+}
+
+main>form>input:focus {
+    outline: none;
+}
+
+main>form>label {
+    font-family: 'Noto Sans Mono', monospace;
+    user-select: none;
+    -ms-user-select: none;
+    -moz-user-select: none;
+    -webkit-user-select: none;
+}
+
+div.timer-area {
+    font-family: 'Noto Sans Mono', monospace;
+    font-size: 12rem;
+    font-weight: 500;
+    text-align: center;
+}
+
+@media (max-width: 799px) {
+    div.timer-area {
+        font-size: 2.5rem;
+    }
+}
+
+div.message-area {
+    font-size: 6rem;
+    text-align: center;
+}
+
+footer {
+    color: #888888;
+    width: 90%;
+    margin: 20px auto;
+    margin-top: 40px;
+}
+
+footer>div {
+    margin: 10px 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-around;
+}
+
+footer a {
+    color: #447f88;
+    text-decoration: none;
+}
+
+footer a:visited {
+    color: #754488;
+}
+
+@media (max-width: 799px) {
+    footer {
+        margin-top: 20px;
+    }
+
+    footer>div {
+        width: 100%;
+        margin: 0 auto;
+        flex-direction: column;
+    }
+
+    footer div.footer-item {
+        margin: 0 auto;
+    }
+}
+
+/*
+    help window
+    information policy window
+*/
+span.help-button,
+span.help-close {
+    font-size: 24px;
+    cursor: pointer;
+}
+
+div.help-close-outer {
+    width: 100%;
+    text-align: right;
+}
+
+div.help-window {
+    display: none;
+}
+
+div.help-window.active {
+    display: block;
+    background-color: #ffffff;
+    opacity: 0.95;
+    width: fit-content;
+    height: fit-content;
+    max-width: 80%;
+    max-height: 60%;
+    position: absolute;
+    z-index: 2;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    right: 0;
+    margin: auto;
+    padding: 0.5rem 2rem 2rem 2rem;
+    box-shadow: 0px 0px 5px 1px #999;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+div.help-window a {
+    color: #447f88;
+}
+
+div.help-window a:visited {
+    color: #754488;
+}
+
+span.material-symbols-outlined:hover {
+    font-variation-settings:
+        'FILL' 1
+}
+
+span.material-symbols-outlined.help-close:hover {
+    color: #ffffff;
+    background-color: #444444;
+}
