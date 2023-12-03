@@ -1,10 +1,10 @@
 # ccc
 
-Version 0.1.0
+Version 0.1.1
 
 [English README](README.md)
 
-ccc: customizable command countdown-timer. 
+ccc: customizable command countdown-timer.
 
 ## 概要
 
@@ -18,18 +18,18 @@ ccc: customizable command countdown-timer.
 
 ## コマンド
 
-|コマンド|機能|
-|-------|------|
-|`down <time>`|カウントダウン|
-|`up <time>`|カウントアップ|
+| コマンド      | 機能           |
+| ------------- | -------------- |
+| `down <time>` | カウントダウン |
+| `up <time>`   | カウントアップ |
 
 ## オプション
 
-|オプション|機能|
-|-------|------|
-|`--color\|-c <hex code>`|文字色を指定する。デフォルトは `#333333`。|
-|`--background\|-bg <hex code>`|背景色を指定する。デフォルトは `#ffffff`。|
-|`--message\|-m <text>`|タイマーの下に表示するメッセージを指定する。デフォルトは空文字。|
+| オプション                     | 機能                                                             |
+| ------------------------------ | ---------------------------------------------------------------- |
+| `--color\|-c <hex code>`       | 文字色を指定する。デフォルトは `#333333`。                       |
+| `--background\|-bg <hex code>` | 背景色を指定する。デフォルトは `#ffffff`。                       |
+| `--message\|-m <text>`         | タイマーの下に表示するメッセージを指定する。デフォルトは空文字。 |
 
 ## 例
 
@@ -37,13 +37,13 @@ ccc: customizable command countdown-timer.
 down 5:00 --message hey
 ```
 
-5分間カウントダウンする。タイマーの下には「hey」と表示する。
+5 分間カウントダウンする。タイマーの下には「hey」と表示する。
 
 ```
 down 5:00 --message Presentation. up 120 -bg #aaccff -m Questions and answers.
 ```
 
-5分間カウントダウンする。タイマーの下には「Presentation」と表示する。その後、120秒間（2分間）カウントアップする。背景色は淡い青で、タイマーの下には「Questions and answers.」と表示する。
+5 分間カウントダウンする。タイマーの下には「Presentation」と表示する。その後、120 秒間（2 分間）カウントアップする。背景色は淡い青で、タイマーの下には「Questions and answers.」と表示する。
 
 ## 推奨環境
 

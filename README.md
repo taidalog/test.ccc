@@ -1,6 +1,6 @@
 # ccc
 
-Version 0.1.0
+Version 0.1.1
 
 [Japanese README](README.ja.md)
 
@@ -18,18 +18,18 @@ ccc: customizable command countdown-timer.
 
 ## Commands
 
-|Command|Feature|
-|-------|------|
-|`down <time>`|Countdown.|
-|`up <time>`|Countup.|
+| Command       | Feature    |
+| ------------- | ---------- |
+| `down <time>` | Countdown. |
+| `up <time>`   | Countup.   |
 
 ## Options
 
-|Options|Feature|
-|-------|------|
-|`--color\|-c <hex code>`|Specifies text color. Default: `#333333`.|
-|`--background\|-bg <hex code>`|Specifies background color. Default: `#ffffff`.|
-|`--message\|-m <text>`|Specifies message to show below the timer. Default: an empty string.|
+| Options                        | Feature                                                              |
+| ------------------------------ | -------------------------------------------------------------------- |
+| `--color\|-c <hex code>`       | Specifies text color. Default: `#333333`.                            |
+| `--background\|-bg <hex code>` | Specifies background color. Default: `#ffffff`.                      |
+| `--message\|-m <text>`         | Specifies message to show below the timer. Default: an empty string. |
 
 ## Examples
 
