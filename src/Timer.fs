@@ -54,8 +54,13 @@ module Timer' =
 
     let rec start commands : unit =
         match commands with
-        | [] -> ()
+        | [] ->
+            document.getElementById("timerArea").classList.add "finished"
+            document.getElementById("messageArea").classList.add "finished"
         | h :: t ->
+            document.getElementById("timerArea").classList.remove "finished"
+            document.getElementById("messageArea").classList.remove "finished"
+
             state <-
                 { initState with
                     Stop =

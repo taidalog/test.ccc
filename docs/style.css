@@ -90,6 +90,16 @@ main>form>label {
     -webkit-user-select: none;
 }
 
+@keyframes fade {
+    0% {
+        opacity: 0.75;
+    }
+
+    100% {
+        opacity: 0.45;
+    }
+}
+
 div.timer-area {
     font-family: 'Noto Sans Mono', monospace;
     font-size: calc(calc(100vw - 10%) / 7);
@@ -104,6 +114,11 @@ div.timer-area>span.decimals {
 div.message-area {
     font-size: calc(calc(100vw - 10%) / 12);
     text-align: center;
+}
+
+div.timer-area.finished,
+div.message-area.finished {
+    animation: 1s ease-in-out 0s infinite alternate fade;
 }
 
 footer {
