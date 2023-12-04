@@ -97,6 +97,11 @@ div.timer-area {
     text-align: center;
 }
 
+div.timer-area>span.decimals {
+    font-size: 6rem;
+}
+
+
 @media (max-width: 799px) {
     div.timer-area {
         font-size: 2.5rem;
