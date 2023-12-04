@@ -40,10 +40,10 @@ down 5:00 --message hey
 5 分間カウントダウンする。タイマーの下には「hey」と表示する。
 
 ```
-down 5:00 --message Presentation. up 120 -bg #aaccff -m Questions and answers.
+down 5:00 --message Presentation. up 120 -bg #aaccff -m Questions and answers. -c #222266
 ```
 
-5 分間カウントダウンする。タイマーの下には「Presentation」と表示する。その後、120 秒間（2 分間）カウントアップする。背景色は淡い青で、タイマーの下には「Questions and answers.」と表示する。
+5 分間カウントダウンする。タイマーの下には「Presentation」と表示する。その後、120 秒間（2 分間）カウントアップする。文字色は濃い青、背景色は淡い青で、タイマーの下には「Questions and answers.」と表示する。
 
 ## 推奨環境
 
@@ -64,7 +64,7 @@ down 5:00 --message Presentation. up 120 -bg #aaccff -m Questions and answers.
 
 ## リリースノート
 
-[Releases](https://github.com/taidalog/ccc/releases)
+[Releases on GitHub](https://github.com/taidalog/ccc/releases)
 
 ## License
 
