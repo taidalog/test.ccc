@@ -92,20 +92,13 @@ main>form>label {
 
 div.timer-area {
     font-family: 'Noto Sans Mono', monospace;
-    font-size: 12rem;
+    font-size: calc(calc(100vw - 10%) / 7);
     font-weight: 500;
     text-align: center;
 }
 
 div.timer-area>span.decimals {
-    font-size: 6rem;
-}
-
-
-@media (max-width: 799px) {
-    div.timer-area {
-        font-size: 2.5rem;
-    }
+    font-size: calc(calc(100vw - 10%) / 12);
 }
 
 div.message-area {
