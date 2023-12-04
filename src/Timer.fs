@@ -1,4 +1,4 @@
-// ccc Version 0.1.1
+// ccc Version 0.2.0
 // https://github.com/taidalog/ccc
 // Copyright (c) 2023 taidalog
 // This software is licensed under the MIT License.
@@ -50,12 +50,17 @@ module Timer' =
         let m = timeSpan.Minutes |> string |> String.padLeft 2 '0'
         let s = timeSpan.Seconds |> string |> String.padLeft 2 '0'
         let ms = timeSpan.Milliseconds |> string |> String.padLeft 3 '0'
-        $"%s{h}:%s{m}:%s{s}.%s{ms}"
+        $"""%s{h}:%s{m}:%s{s}<span class="decimals">.%s{ms}</span>"""
 
     let rec start commands : unit =
         match commands with
-        | [] -> ()
+        | [] ->
+            document.getElementById("timerArea").classList.add "finished"
+            document.getElementById("messageArea").classList.add "finished"
         | h :: t ->
+            document.getElementById("timerArea").classList.remove "finished"
+            document.getElementById("messageArea").classList.remove "finished"
+
             state <-
                 { initState with
                     Stop =
@@ -76,9 +81,9 @@ module Timer' =
                             let elapsedTime = time - (DateTime.Now - state.Stop.StartTime + state.Stop.Acc)
 
                             if elapsedTime >= TimeSpan.Zero then
-                                document.getElementById("timerArea").innerText <- timeSpanToDisplay elapsedTime
+                                document.getElementById("timerArea").innerHTML <- timeSpanToDisplay elapsedTime
                             else
-                                document.getElementById("timerArea").innerText <- timeSpanToDisplay TimeSpan.Zero
+                                document.getElementById("timerArea").innerHTML <- timeSpanToDisplay TimeSpan.Zero
                                 clearInterval state.IntervalId
                                 start t)
                         10
@@ -94,9 +99,9 @@ module Timer' =
                             let elapsedTime = DateTime.Now - state.Stop.StartTime + state.Stop.Acc
 
                             if elapsedTime <= time then
-                                document.getElementById("timerArea").innerText <- timeSpanToDisplay elapsedTime
+                                document.getElementById("timerArea").innerHTML <- timeSpanToDisplay elapsedTime
                             else
-                                document.getElementById("timerArea").innerText <- timeSpanToDisplay time
+                                document.getElementById("timerArea").innerHTML <- timeSpanToDisplay time
                                 clearInterval state.IntervalId
                                 start t)
                         10

@@ -1,6 +1,6 @@
 # ccc
 
-Version 0.1.1
+Version 0.2.0
 
 [Japanese README](README.ja.md)
 
@@ -21,7 +21,7 @@ ccc: customizable command countdown-timer.
 | Command       | Feature    |
 | ------------- | ---------- |
 | `down <time>` | Countdown. |
-| `up <time>`   | Countup.   |
+| `up <time>`   | Count up.  |
 
 ## Options
 
@@ -40,10 +40,10 @@ down 5:00 --message hey
 Countdown for 5 minutes, with a message "hey" below the timer.
 
 ```
-down 5:00 --message Presentation. up 120 -bg #aaccff -m Questions and answers.
+down 5:00 --message Presentation. up 120 -bg #aaccff -m Questions and answers. -c #222266
 ```
 
-Countdown for 5 minutes, with a message "Presentation." below the timer. Then countup for 120 seconds (2 minutes), with the pale blue background and a message "Questions and answers.".
+Countdown for 5 minutes, with a message "Presentation." below the timer. Then count up for 120 seconds (2 minutes), with the dark blue text and the pale blue background and a message "Questions and answers.".
 
 ## Recommended environment
 
@@ -64,7 +64,7 @@ Countdown for 5 minutes, with a message "Presentation." below the timer. Then co
 
 ## Release Notes
 
-[Releases](https://github.com/taidalog/ccc/releases)
+[Releases on GitHub](https://github.com/taidalog/ccc/releases)
 
 ## License
 
