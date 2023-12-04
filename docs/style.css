@@ -102,7 +102,7 @@ div.timer-area>span.decimals {
 }
 
 div.message-area {
-    font-size: 6rem;
+    font-size: calc(calc(100vw - 10%) / 12);
     text-align: center;
 }
 
