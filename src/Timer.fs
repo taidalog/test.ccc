@@ -7,6 +7,7 @@ namespace Ccc
 
 open System
 open Browser.Dom
+open Browser.Types
 open Fable.Core
 open Command
 open Fermata
@@ -23,6 +24,7 @@ module Timer' =
     type State =
         { Stop: TimeAcc
           IntervalId: int
+          Commands: Command list
           RunningStatus: RunningStatus }
 
     [<Emit("setInterval($0, $1)")>]
@@ -36,6 +38,7 @@ module Timer' =
             { StartTime = DateTime.MinValue
               Acc = TimeSpan.Zero }
           IntervalId = -1
+          Commands = []
           RunningStatus = RunningStatus.NotStarted }
 
     let initState =
@@ -43,6 +46,7 @@ module Timer' =
             { StartTime = DateTime.MinValue
               Acc = TimeSpan.Zero }
           IntervalId = -1
+          Commands = []
           RunningStatus = RunningStatus.NotStarted }
 
     let timeSpanToDisplay (timeSpan: TimeSpan) =
@@ -52,12 +56,10 @@ module Timer' =
         let ms = timeSpan.Milliseconds |> string |> String.padLeft 3 '0'
         $"""%s{h}:%s{m}:%s{s}<span class="decimals">.%s{ms}</span>"""
 
-    let rec start commands : unit =
-        match commands with
-        | [] ->
-            document.getElementById("timerArea").classList.add "finished"
-            document.getElementById("messageArea").classList.add "finished"
-        | h :: t ->
+    let rec start () : unit =
+        match state.RunningStatus with
+        | RunningStatus.NotStarted
+        | RunningStatus.Finished ->
             document.getElementById("timerArea").classList.remove "finished"
             document.getElementById("messageArea").classList.remove "finished"
 
@@ -67,43 +69,75 @@ module Timer' =
                         { initState.Stop with
                             StartTime = DateTime.Now
                             Acc = TimeSpan.Zero }
+                    Commands =
+                        (document.getElementById "commandInput" :?> HTMLInputElement).value
+                        |> splitInput'
+                        |> Array.map parse
+                        |> Array.toList
                     RunningStatus = RunningStatus.Running }
 
-            match h with
-            | Command.Invalid -> start t
-            | Command.CountDown(time, color, bgcolor, message) ->
-                document.body.setAttribute ("style", (sprintf "color: %s; background-color: %s;" color bgcolor))
-                (document.getElementById "messageArea").innerText <- message
+            start ()
+        | RunningStatus.Running ->
+            match state.Commands with
+            | [] ->
+                document.getElementById("timerArea").classList.add "finished"
+                document.getElementById("messageArea").classList.add "finished"
 
-                let intervalId =
-                    setInterval
-                        (fun _ ->
-                            let elapsedTime = time - (DateTime.Now - state.Stop.StartTime + state.Stop.Acc)
+                state <-
+                    { initState with
+                        RunningStatus = RunningStatus.Finished }
+            | h :: t ->
+                document.getElementById("timerArea").classList.remove "finished"
+                document.getElementById("messageArea").classList.remove "finished"
 
-                            if elapsedTime >= TimeSpan.Zero then
-                                document.getElementById("timerArea").innerHTML <- timeSpanToDisplay elapsedTime
-                            else
-                                document.getElementById("timerArea").innerHTML <- timeSpanToDisplay TimeSpan.Zero
-                                clearInterval state.IntervalId
-                                start t)
-                        10
+                state <-
+                    { initState with
+                        Stop =
+                            { initState.Stop with
+                                StartTime = DateTime.Now
+                                Acc = TimeSpan.Zero }
+                        RunningStatus = RunningStatus.Running }
 
-                state <- { state with IntervalId = intervalId }
-            | Command.CountUp(time, color, bgcolor, message) ->
-                document.body.setAttribute ("style", (sprintf "color: %s; background-color: %s;" color bgcolor))
-                (document.getElementById "messageArea").innerText <- message
+                match h with
+                | Command.Invalid ->
+                    state <- { state with Commands = t }
+                    start ()
+                | Command.CountDown(time, color, bgcolor, message) ->
+                    document.body.setAttribute ("style", (sprintf "color: %s; background-color: %s;" color bgcolor))
+                    (document.getElementById "messageArea").innerText <- message
 
-                let intervalId =
-                    setInterval
-                        (fun _ ->
-                            let elapsedTime = DateTime.Now - state.Stop.StartTime + state.Stop.Acc
+                    let intervalId =
+                        setInterval
+                            (fun _ ->
+                                let elapsedTime = time - (DateTime.Now - state.Stop.StartTime + state.Stop.Acc)
 
-                            if elapsedTime <= time then
-                                document.getElementById("timerArea").innerHTML <- timeSpanToDisplay elapsedTime
-                            else
-                                document.getElementById("timerArea").innerHTML <- timeSpanToDisplay time
-                                clearInterval state.IntervalId
-                                start t)
-                        10
+                                if elapsedTime >= TimeSpan.Zero then
+                                    document.getElementById("timerArea").innerHTML <- timeSpanToDisplay elapsedTime
+                                else
+                                    document.getElementById("timerArea").innerHTML <- timeSpanToDisplay TimeSpan.Zero
+                                    clearInterval state.IntervalId
+                                    state <- { state with Commands = t }
+                                    start ())
+                            10
 
-                state <- { state with IntervalId = intervalId }
+                    state <- { state with IntervalId = intervalId }
+                | Command.CountUp(time, color, bgcolor, message) ->
+                    document.body.setAttribute ("style", (sprintf "color: %s; background-color: %s;" color bgcolor))
+                    (document.getElementById "messageArea").innerText <- message
+
+                    let intervalId =
+                        setInterval
+                            (fun _ ->
+                                let elapsedTime = DateTime.Now - state.Stop.StartTime + state.Stop.Acc
+
+                                if elapsedTime <= time then
+                                    document.getElementById("timerArea").innerHTML <- timeSpanToDisplay elapsedTime
+                                else
+                                    document.getElementById("timerArea").innerHTML <- timeSpanToDisplay time
+                                    clearInterval state.IntervalId
+                                    state <- { state with Commands = t }
+                                    start ())
+                            10
+
+                    state <- { state with IntervalId = intervalId }
+        | _ -> ()

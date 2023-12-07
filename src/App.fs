@@ -64,7 +64,8 @@ module App =
                     |> Array.map (parse >> string)
                     |> Array.iter (printfn "%s")
 
-                    commandInput.value |> splitInput' |> Array.map parse |> Array.toList |> start
+                    //commandInput.value |> splitInput' |> Array.map parse |> Array.toList |> start
+                    start ()
                     false
 
             // help window
