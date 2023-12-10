@@ -1,6 +1,6 @@
 # ccc
 
-Version 0.2.0
+Version 0.2.1
 
 [Japanese README](README.ja.md)
 
@@ -38,6 +38,18 @@ down 5:00 --message hey
 ```
 
 Countdown for 5 minutes, with a message "hey" below the timer.
+
+```
+down 5:00 down 90
+```
+
+Countdown for 5 minutes, with no message below the timer. Then countdown for 90 seconds (1 minute and 30 seconds), with no message.
+
+```
+down 5:00 --color #222266 --background #aaccff --message hello
+```
+
+Countdown for 5 minutes, with the dark blue text, the pale blue background and a message "hello" below the timer.
 
 ```
 down 5:00 --message Presentation. up 120 -bg #aaccff -m Questions and answers. -c #222266

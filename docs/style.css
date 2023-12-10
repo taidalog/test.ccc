@@ -1,5 +1,5 @@
 /*
-  ccc Version 0.2.0
+  ccc Version 0.2.1
   https://github.com/taidalog/ccc
   Copyright (c) 2023 taidalog
   This software is licensed under the MIT License.
@@ -75,6 +75,12 @@ main>form>input {
     color: #ffffff;
     background-color: #444444;
     border: none;
+}
+
+@media (max-width: 799px) {
+    main>form>input {
+        width: calc(100% - 2rem);
+    }
 }
 
 main>form>input:focus {
@@ -182,6 +188,7 @@ div.help-window {
 div.help-window.active {
     display: block;
     background-color: #ffffff;
+    color: #444444;
     opacity: 0.95;
     width: fit-content;
     height: fit-content;
