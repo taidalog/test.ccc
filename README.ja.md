@@ -40,6 +40,18 @@ down 5:00 --message hey
 5 分間カウントダウンする。タイマーの下には「hey」と表示する。
 
 ```
+down 5:00 down 90
+```
+
+5 分間カウントダウンする。タイマーの下には何も表示しない。その後、90 秒間（1 分半）カウントアップする。タイマーの下には何も表示しない。
+
+```
+down 5:00 --color #222266 --background #aaccff --message hello
+```
+
+5 分間カウントダウンする。文字色は濃い青、背景色は淡い青で、タイマーの下には「hello」と表示する。
+
+```
 down 5:00 --message Presentation. up 120 -bg #aaccff -m Questions and answers. -c #222266
 ```
 
