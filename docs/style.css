@@ -182,6 +182,7 @@ div.help-window {
 div.help-window.active {
     display: block;
     background-color: #ffffff;
+    color: #444444;
     opacity: 0.95;
     width: fit-content;
     height: fit-content;
