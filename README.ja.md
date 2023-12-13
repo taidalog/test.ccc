@@ -1,6 +1,6 @@
 # ccc
 
-Version 0.2.1
+Version 0.3.0
 
 [English README](README.md)
 
