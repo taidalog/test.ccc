@@ -41,6 +41,10 @@ module App =
 
                 if isInformationPolicyWindowActive then
                     informationPolicyWindow.classList.remove "active"
+
+                if not isHelpWindowActive && not isInformationPolicyWindowActive then
+                    stop ()
+            | "Enter" -> start'' ()
             | "?" ->
                 if not isHelpWindowActive then
                     helpWindow.classList.add "active"
@@ -65,7 +69,7 @@ module App =
                     |> Array.iter (printfn "%s")
 
                     //commandInput.value |> splitInput' |> Array.map parse |> Array.toList |> start
-                    start ()
+                    start'' ()
                     false
 
             // help window

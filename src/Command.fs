@@ -35,6 +35,11 @@ module Command =
 
         member this.DisplayText = this.ToString()
 
+    let time (command: Command) : TimeSpan =
+        match command with
+        | Command.CountDown(time, _, _, _) -> time
+        | Command.CountUp(time, _, _, _) -> time
+
     let f (value: string) : string * string * string =
         value.Split([| ':' |])
         |> Array.toList
@@ -103,3 +108,64 @@ module Command =
         | x when Regex.IsMatch(x, "^down") -> x |> parseInput |> Command.CountDown
         | x when Regex.IsMatch(x, "^up") -> x |> parseInput |> Command.CountUp
         | _ -> Command.Invalid
+
+module Command' =
+    [<StructuredFormatDisplay("{DisplayText}")>]
+    type Command' =
+        | CountDown of Duration: TimeSpan * Delay: TimeSpan * Color: string * Background: string * Message: string
+        | CountUp of Duration: TimeSpan * Delay: TimeSpan * Color: string * Background: string * Message: string
+        | Invalid
+
+        override this.ToString() =
+            match this with
+            | Command'.CountDown(duration, delay, color, bgcolor, message) ->
+                sprintf
+                    "Countdown for %s, delayed %s, color: %s; background-color: %s; message: %s"
+                    (string duration)
+                    (string delay)
+                    color
+                    bgcolor
+                    message
+            | Command'.CountUp(duration, delay, color, bgcolor, message) ->
+                sprintf
+                    "Countup for %s, delayed %s, color: %s; background-color: %s; message: %s"
+                    (string duration)
+                    (string delay)
+                    color
+                    bgcolor
+                    message
+            | Command'.Invalid -> "An invalid input"
+
+        member this.DisplayText = this.ToString()
+
+    let ofCommands commands =
+        let delays =
+            commands
+            |> List.map Command.time
+            |> List.scan (+) TimeSpan.Zero
+            |> (List.rev >> List.tail >> List.rev)
+
+        (commands, delays)
+        ||> List.map2 (fun x y ->
+            match x with
+            | Command.CountDown(time, color, background, message) ->
+                Command'.CountDown(time, y, color, background, message)
+            | Command.CountUp(time, color, background, message) ->
+                Command'.CountUp(time, y, color, background, message))
+
+    let ofString input =
+        input
+        |> Command.splitInput'
+        |> Array.map Command.parse
+        |> Array.toList
+        |> ofCommands
+
+    let duration command' =
+        match command' with
+        | Command'.CountDown(duration, _, _, _, _) -> duration
+        | Command'.CountUp(duration, _, _, _, _) -> duration
+
+    let delay command' =
+        match command' with
+        | Command'.CountDown(_, delay, _, _, _) -> delay
+        | Command'.CountUp(_, delay, _, _, _) -> delay
