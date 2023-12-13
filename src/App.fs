@@ -64,9 +64,9 @@ module App =
                     commandInput.blur ()
 
                     commandInput.value
-                    |> splitInput'
-                    |> Array.map (parse >> string)
-                    |> Array.iter (printfn "%s")
+                    |> Command.ofString
+                    |> List.map string
+                    |> List.iter (printfn "%s")
 
                     //commandInput.value |> splitInput' |> Array.map parse |> Array.toList |> start
                     start ()

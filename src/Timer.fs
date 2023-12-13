@@ -9,7 +9,7 @@ open System
 open Browser.Dom
 open Browser.Types
 open Fable.Core
-open Command'
+open Command
 open Fermata
 
 module Timer' =
@@ -24,7 +24,7 @@ module Timer' =
     type State =
         { Stop: TimeAcc
           IntervalId: int
-          Commands: Command' list
+          Commands: Command list
           RunningStatus: RunningStatus }
 
     [<Emit("setInterval($0, $1)")>]
@@ -56,13 +56,17 @@ module Timer' =
         let ms = timeSpan.Milliseconds |> string |> String.padLeft 3 '0'
         $"""%s{h}:%s{m}:%s{s}<span class="decimals">.%s{ms}</span>"""
 
-    let f (command's: Command' list) (startTime: DateTime) (acc: TimeSpan) (t: DateTime) : TimeSpan =
+    let currentCommand (commands: Command list) (startTime: DateTime) (acc: TimeSpan) (t: DateTime) : Command =
         let passed = t - startTime + acc
-        let c = command's |> List.findBack (fun x -> Command'.delay x <= passed)
+        commands |> List.findBack (fun x -> Command.delay x <= passed)
+
+    let f (commands: Command list) (startTime: DateTime) (acc: TimeSpan) (t: DateTime) : TimeSpan =
+        let passed = t - startTime + acc
+        let c = currentCommand commands startTime acc t
 
         match c with
-        | Command'.CountDown(duration, delay, _, _, _) -> duration - (passed - delay)
-        | Command'.CountUp(_, delay, _, _, _) -> passed - delay
+        | Command.CountDown(duration, delay, _, _, _) -> duration - (passed - delay)
+        | Command.CountUp(_, delay, _, _, _) -> passed - delay
 
     let start () =
         match state.RunningStatus with
@@ -71,9 +75,9 @@ module Timer' =
             (document.getElementById "timerArea").classList.remove "finished"
             (document.getElementById "messageArea").classList.remove "finished"
 
-            let command's =
+            let commands =
                 (document.getElementById "commandInput" :?> HTMLInputElement).value
-                |> Command'.ofString
+                |> Command.ofString
 
             state <-
                 { initState with
@@ -81,13 +85,13 @@ module Timer' =
                         { initState.Stop with
                             StartTime = DateTime.Now
                             Acc = TimeSpan.Zero }
-                    Commands = command's
+                    Commands = commands
                     RunningStatus = RunningStatus.Running }
 
             let f' = f state.Commands state.Stop.StartTime
 
             let totalDuration =
-                state.Commands |> List.map Command'.duration |> List.fold (+) TimeSpan.Zero
+                state.Commands |> List.map Command.duration |> List.fold (+) TimeSpan.Zero
 
             let intervalId =
                 setInterval
@@ -95,10 +99,22 @@ module Timer' =
                         let elapsedTime = f' state.Stop.Acc DateTime.Now
                         (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay elapsedTime
 
+                        currentCommand state.Commands state.Stop.StartTime state.Stop.Acc DateTime.Now
+                        |> function
+                            | Command.CountDown(_, _, color, bgcolor, message) -> (color, bgcolor, message)
+                            | Command.CountUp(_, _, color, bgcolor, message) -> (color, bgcolor, message)
+                        |> fun (color, bgcolor, message) ->
+                            document.body.setAttribute (
+                                "style",
+                                (sprintf "color: %s; background-color: %s;" color bgcolor)
+                            )
+
+                            (document.getElementById "messageArea").innerText <- message
+
                         if (DateTime.Now - state.Stop.StartTime + state.Stop.Acc) > totalDuration then
                             match state.Commands |> List.last with
-                            | Command'.CountDown(_, _, _, _, _) -> TimeSpan.Zero
-                            | Command'.CountUp(duration, _, _, _, _) -> duration
+                            | Command.CountDown(_, _, _, _, _) -> TimeSpan.Zero
+                            | Command.CountUp(duration, _, _, _, _) -> duration
                             |> fun x -> (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay x
 
                             (document.getElementById "timerArea").classList.add "finished"
@@ -123,7 +139,7 @@ module Timer' =
             let f' = f state.Commands state.Stop.StartTime
 
             let totalDuration =
-                state.Commands |> List.map Command'.duration |> List.fold (+) TimeSpan.Zero
+                state.Commands |> List.map Command.duration |> List.fold (+) TimeSpan.Zero
 
             let intervalId =
                 setInterval
@@ -131,10 +147,22 @@ module Timer' =
                         let elapsedTime = f' state.Stop.Acc DateTime.Now
                         (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay elapsedTime
 
+                        currentCommand state.Commands state.Stop.StartTime state.Stop.Acc DateTime.Now
+                        |> function
+                            | Command.CountDown(_, _, color, bgcolor, message) -> (color, bgcolor, message)
+                            | Command.CountUp(_, _, color, bgcolor, message) -> (color, bgcolor, message)
+                        |> fun (color, bgcolor, message) ->
+                            document.body.setAttribute (
+                                "style",
+                                (sprintf "color: %s; background-color: %s;" color bgcolor)
+                            )
+
+                            (document.getElementById "messageArea").innerText <- message
+
                         if (DateTime.Now - state.Stop.StartTime + state.Stop.Acc) > totalDuration then
                             match state.Commands |> List.last with
-                            | Command'.CountDown(_, _, _, _, _) -> TimeSpan.Zero
-                            | Command'.CountUp(duration, _, _, _, _) -> duration
+                            | Command.CountDown(_, _, _, _, _) -> TimeSpan.Zero
+                            | Command.CountUp(duration, _, _, _, _) -> duration
                             |> fun x -> (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay x
 
                             (document.getElementById "timerArea").classList.add "finished"

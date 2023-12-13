@@ -8,37 +8,37 @@ namespace Ccc
 open System
 open System.Text.RegularExpressions
 
-module Command =
+module CommandM =
     [<StructuredFormatDisplay("{DisplayText}")>]
-    type Command =
+    type CommandM =
         | CountDown of Time: TimeSpan * Color: string * Background: string * Message: string
         | CountUp of Time: TimeSpan * Color: string * Background: string * Message: string
         | Invalid
 
         override this.ToString() =
             match this with
-            | Command.CountDown(time, color, bgcolor, message) ->
+            | CommandM.CountDown(time, color, bgcolor, message) ->
                 sprintf
                     "Countdown for %s, color: %s; background-color: %s; message: %s"
                     (string time)
                     color
                     bgcolor
                     message
-            | Command.CountUp(time, color, bgcolor, message) ->
+            | CommandM.CountUp(time, color, bgcolor, message) ->
                 sprintf
                     "Countup for %s, color: %s; background-color: %s; message: %s"
                     (string time)
                     color
                     bgcolor
                     message
-            | Command.Invalid -> "An invalid input"
+            | CommandM.Invalid -> "An invalid input"
 
         member this.DisplayText = this.ToString()
 
-    let time (command: Command) : TimeSpan =
-        match command with
-        | Command.CountDown(time, _, _, _) -> time
-        | Command.CountUp(time, _, _, _) -> time
+    let time (commandm: CommandM) : TimeSpan =
+        match commandm with
+        | CommandM.CountDown(time, _, _, _) -> time
+        | CommandM.CountUp(time, _, _, _) -> time
 
     let f (value: string) : string * string * string =
         value.Split([| ':' |])
@@ -63,7 +63,7 @@ module Command =
         |> Array.map (fun x -> x.Trim())
         |> Array.filter (String.IsNullOrWhiteSpace >> not)
 
-    let splitCommand (input: string) : string array =
+    let splitCommandM (input: string) : string array =
         Regex.Split(input, "(?= -{1,2}[A-Za-z][0-9A-Za-z]* ?)")
         |> Array.map (fun x -> x.Trim())
         |> Array.filter (String.IsNullOrWhiteSpace >> not)
@@ -94,7 +94,7 @@ module Command =
 
             if Regex.IsMatch(input, pattern) then
                 input
-                |> splitCommand
+                |> splitCommandM
                 |> Array.filter (fun x -> Regex.IsMatch(x, pattern))
                 |> Array.last
                 |> fun x -> Regex.Match(x, ".*(--message|-m) (.+)").Groups.[2].Value
@@ -103,22 +103,22 @@ module Command =
 
         time, color, bgcolor, message
 
-    let parse (input: string) : Command =
+    let parse (input: string) : CommandM =
         match input with
-        | x when Regex.IsMatch(x, "^down") -> x |> parseInput |> Command.CountDown
-        | x when Regex.IsMatch(x, "^up") -> x |> parseInput |> Command.CountUp
-        | _ -> Command.Invalid
+        | x when Regex.IsMatch(x, "^down") -> x |> parseInput |> CommandM.CountDown
+        | x when Regex.IsMatch(x, "^up") -> x |> parseInput |> CommandM.CountUp
+        | _ -> CommandM.Invalid
 
-module Command' =
+module Command =
     [<StructuredFormatDisplay("{DisplayText}")>]
-    type Command' =
+    type Command =
         | CountDown of Duration: TimeSpan * Delay: TimeSpan * Color: string * Background: string * Message: string
         | CountUp of Duration: TimeSpan * Delay: TimeSpan * Color: string * Background: string * Message: string
         | Invalid
 
         override this.ToString() =
             match this with
-            | Command'.CountDown(duration, delay, color, bgcolor, message) ->
+            | Command.CountDown(duration, delay, color, bgcolor, message) ->
                 sprintf
                     "Countdown for %s, delayed %s, color: %s; background-color: %s; message: %s"
                     (string duration)
@@ -126,7 +126,7 @@ module Command' =
                     color
                     bgcolor
                     message
-            | Command'.CountUp(duration, delay, color, bgcolor, message) ->
+            | Command.CountUp(duration, delay, color, bgcolor, message) ->
                 sprintf
                     "Countup for %s, delayed %s, color: %s; background-color: %s; message: %s"
                     (string duration)
@@ -134,38 +134,38 @@ module Command' =
                     color
                     bgcolor
                     message
-            | Command'.Invalid -> "An invalid input"
+            | Command.Invalid -> "An invalid input"
 
         member this.DisplayText = this.ToString()
 
     let ofCommands commands =
         let delays =
             commands
-            |> List.map Command.time
+            |> List.map CommandM.time
             |> List.scan (+) TimeSpan.Zero
             |> (List.rev >> List.tail >> List.rev)
 
         (commands, delays)
         ||> List.map2 (fun x y ->
             match x with
-            | Command.CountDown(time, color, background, message) ->
-                Command'.CountDown(time, y, color, background, message)
-            | Command.CountUp(time, color, background, message) ->
-                Command'.CountUp(time, y, color, background, message))
+            | CommandM.CountDown(time, color, background, message) ->
+                Command.CountDown(time, y, color, background, message)
+            | CommandM.CountUp(time, color, background, message) ->
+                Command.CountUp(time, y, color, background, message))
 
     let ofString input =
         input
-        |> Command.splitInput'
-        |> Array.map Command.parse
+        |> CommandM.splitInput'
+        |> Array.map CommandM.parse
         |> Array.toList
         |> ofCommands
 
-    let duration command' =
-        match command' with
-        | Command'.CountDown(duration, _, _, _, _) -> duration
-        | Command'.CountUp(duration, _, _, _, _) -> duration
+    let duration command =
+        match command with
+        | Command.CountDown(duration, _, _, _, _) -> duration
+        | Command.CountUp(duration, _, _, _, _) -> duration
 
-    let delay command' =
-        match command' with
-        | Command'.CountDown(_, delay, _, _, _) -> delay
-        | Command'.CountUp(_, delay, _, _, _) -> delay
+    let delay command =
+        match command with
+        | Command.CountDown(_, delay, _, _, _) -> delay
+        | Command.CountUp(_, delay, _, _, _) -> delay
