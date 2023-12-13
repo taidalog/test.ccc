@@ -45,6 +45,10 @@ module App =
                 if not isHelpWindowActive && not isInformationPolicyWindowActive then
                     stop ()
             | "Enter" -> start ()
+            | "Delete" -> reset ()
+            | "Backspace" ->
+                if e.altKey then
+                    reset ()
             | "?" ->
                 if not isHelpWindowActive then
                     helpWindow.classList.add "active"

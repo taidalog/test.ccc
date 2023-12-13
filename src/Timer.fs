@@ -190,3 +190,16 @@ module Timer' =
                             Acc = state.Stop.Acc + (DateTime.Now - state.Stop.StartTime) }
                     RunningStatus = RunningStatus.Stopping }
         | _ -> ()
+
+    let reset event =
+        match state.RunningStatus with
+        | RunningStatus.Running -> stop ()
+        | RunningStatus.Stopping
+        | RunningStatus.Finished ->
+            (document.getElementById "timerArea").classList.remove "finished"
+            (document.getElementById "messageArea").classList.remove "finished"
+            (document.getElementById "timerArea").innerText <- ""
+            (document.getElementById "messageArea").innerText <- ""
+            document.body.removeAttribute "style"
+            state <- initState
+        | _ -> ()
