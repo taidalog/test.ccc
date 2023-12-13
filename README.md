@@ -1,6 +1,6 @@
 # ccc
 
-Version 0.2.1
+Version 0.3.0
 
 [Japanese README](README.ja.md)
 
@@ -56,6 +56,14 @@ down 5:00 --message Presentation. up 120 -bg #aaccff -m Questions and answers. -
 ```
 
 Countdown for 5 minutes, with a message "Presentation." below the timer. Then count up for 120 seconds (2 minutes), with the dark blue text and the pale blue background and a message "Questions and answers.".
+
+## Keys
+
+| Key                            | Feature                                                                                     |
+| ------------------------------ | ------------------------------------------------------------------------------------------- |
+| `Enter`                        | Starts the timer.                                                                           |
+| `Escape`                       | Stops the timer.<br>Pressing `Enter` key restarts the timer.                                |
+| `Delete` (`Alt` + `Backspace`) | Stops the timer while the timer is running.<br>Resets the timer while the timer is stopped. |
 
 ## Recommended environment
 

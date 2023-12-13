@@ -1,4 +1,4 @@
-// ccc Version 0.2.1
+// ccc Version 0.3.0
 // https://github.com/taidalog/ccc
 // Copyright (c) 2023 taidalog
 // This software is licensed under the MIT License.
@@ -41,6 +41,14 @@ module App =
 
                 if isInformationPolicyWindowActive then
                     informationPolicyWindow.classList.remove "active"
+
+                if not isHelpWindowActive && not isInformationPolicyWindowActive then
+                    stop ()
+            | "Enter" -> start ()
+            | "Delete" -> reset ()
+            | "Backspace" ->
+                if e.altKey then
+                    reset ()
             | "?" ->
                 if not isHelpWindowActive then
                     helpWindow.classList.add "active"
@@ -60,11 +68,12 @@ module App =
                     commandInput.blur ()
 
                     commandInput.value
-                    |> splitInput'
-                    |> Array.map (parse >> string)
-                    |> Array.iter (printfn "%s")
+                    |> Command.ofString
+                    |> List.map string
+                    |> List.iter (printfn "%s")
 
-                    commandInput.value |> splitInput' |> Array.map parse |> Array.toList |> start
+                    //commandInput.value |> splitInput' |> Array.map parse |> Array.toList |> start
+                    start ()
                     false
 
             // help window

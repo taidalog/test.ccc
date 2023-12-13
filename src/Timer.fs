@@ -1,4 +1,4 @@
-// ccc Version 0.2.1
+// ccc Version 0.3.0
 // https://github.com/taidalog/ccc
 // Copyright (c) 2023 taidalog
 // This software is licensed under the MIT License.
@@ -7,6 +7,7 @@ namespace Ccc
 
 open System
 open Browser.Dom
+open Browser.Types
 open Fable.Core
 open Command
 open Fermata
@@ -23,6 +24,7 @@ module Timer' =
     type State =
         { Stop: TimeAcc
           IntervalId: int
+          Commands: Command list
           RunningStatus: RunningStatus }
 
     [<Emit("setInterval($0, $1)")>]
@@ -36,6 +38,7 @@ module Timer' =
             { StartTime = DateTime.MinValue
               Acc = TimeSpan.Zero }
           IntervalId = -1
+          Commands = []
           RunningStatus = RunningStatus.NotStarted }
 
     let initState =
@@ -43,6 +46,7 @@ module Timer' =
             { StartTime = DateTime.MinValue
               Acc = TimeSpan.Zero }
           IntervalId = -1
+          Commands = []
           RunningStatus = RunningStatus.NotStarted }
 
     let timeSpanToDisplay (timeSpan: TimeSpan) =
@@ -52,14 +56,28 @@ module Timer' =
         let ms = timeSpan.Milliseconds |> string |> String.padLeft 3 '0'
         $"""%s{h}:%s{m}:%s{s}<span class="decimals">.%s{ms}</span>"""
 
-    let rec start commands : unit =
-        match commands with
-        | [] ->
-            document.getElementById("timerArea").classList.add "finished"
-            document.getElementById("messageArea").classList.add "finished"
-        | h :: t ->
-            document.getElementById("timerArea").classList.remove "finished"
-            document.getElementById("messageArea").classList.remove "finished"
+    let currentCommand (commands: Command list) (startTime: DateTime) (acc: TimeSpan) (t: DateTime) : Command =
+        let passed = t - startTime + acc
+        commands |> List.findBack (fun x -> Command.delay x <= passed)
+
+    let f (commands: Command list) (startTime: DateTime) (acc: TimeSpan) (t: DateTime) : TimeSpan =
+        let passed = t - startTime + acc
+        let c = currentCommand commands startTime acc t
+
+        match c with
+        | Command.CountDown(duration, delay, _, _, _) -> duration - (passed - delay)
+        | Command.CountUp(_, delay, _, _, _) -> passed - delay
+
+    let start () =
+        match state.RunningStatus with
+        | RunningStatus.NotStarted
+        | RunningStatus.Finished ->
+            (document.getElementById "timerArea").classList.remove "finished"
+            (document.getElementById "messageArea").classList.remove "finished"
+
+            let commands =
+                (document.getElementById "commandInput" :?> HTMLInputElement).value
+                |> Command.ofString
 
             state <-
                 { initState with
@@ -67,43 +85,121 @@ module Timer' =
                         { initState.Stop with
                             StartTime = DateTime.Now
                             Acc = TimeSpan.Zero }
+                    Commands = commands
                     RunningStatus = RunningStatus.Running }
 
-            match h with
-            | Command.Invalid -> start t
-            | Command.CountDown(time, color, bgcolor, message) ->
-                document.body.setAttribute ("style", (sprintf "color: %s; background-color: %s;" color bgcolor))
-                (document.getElementById "messageArea").innerText <- message
+            let f' = f state.Commands state.Stop.StartTime
 
-                let intervalId =
-                    setInterval
-                        (fun _ ->
-                            let elapsedTime = time - (DateTime.Now - state.Stop.StartTime + state.Stop.Acc)
+            let totalDuration =
+                state.Commands |> List.map Command.duration |> List.fold (+) TimeSpan.Zero
 
-                            if elapsedTime >= TimeSpan.Zero then
-                                document.getElementById("timerArea").innerHTML <- timeSpanToDisplay elapsedTime
-                            else
-                                document.getElementById("timerArea").innerHTML <- timeSpanToDisplay TimeSpan.Zero
-                                clearInterval state.IntervalId
-                                start t)
-                        10
+            let intervalId =
+                setInterval
+                    (fun _ ->
+                        let elapsedTime = f' state.Stop.Acc DateTime.Now
+                        (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay elapsedTime
 
-                state <- { state with IntervalId = intervalId }
-            | Command.CountUp(time, color, bgcolor, message) ->
-                document.body.setAttribute ("style", (sprintf "color: %s; background-color: %s;" color bgcolor))
-                (document.getElementById "messageArea").innerText <- message
+                        currentCommand state.Commands state.Stop.StartTime state.Stop.Acc DateTime.Now
+                        |> function
+                            | Command.CountDown(_, _, color, bgcolor, message) -> (color, bgcolor, message)
+                            | Command.CountUp(_, _, color, bgcolor, message) -> (color, bgcolor, message)
+                        |> fun (color, bgcolor, message) ->
+                            document.body.setAttribute (
+                                "style",
+                                (sprintf "color: %s; background-color: %s;" color bgcolor)
+                            )
 
-                let intervalId =
-                    setInterval
-                        (fun _ ->
-                            let elapsedTime = DateTime.Now - state.Stop.StartTime + state.Stop.Acc
+                            (document.getElementById "messageArea").innerText <- message
 
-                            if elapsedTime <= time then
-                                document.getElementById("timerArea").innerHTML <- timeSpanToDisplay elapsedTime
-                            else
-                                document.getElementById("timerArea").innerHTML <- timeSpanToDisplay time
-                                clearInterval state.IntervalId
-                                start t)
-                        10
+                        if (DateTime.Now - state.Stop.StartTime + state.Stop.Acc) > totalDuration then
+                            match state.Commands |> List.last with
+                            | Command.CountDown(_, _, _, _, _) -> TimeSpan.Zero
+                            | Command.CountUp(duration, _, _, _, _) -> duration
+                            |> fun x -> (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay x
 
-                state <- { state with IntervalId = intervalId }
+                            (document.getElementById "timerArea").classList.add "finished"
+                            (document.getElementById "messageArea").classList.add "finished"
+
+                            state <-
+                                { state with
+                                    RunningStatus = RunningStatus.Finished }
+
+                            clearInterval state.IntervalId)
+                    10
+
+            state <- { state with IntervalId = intervalId }
+        | RunningStatus.Stopping ->
+            state <-
+                { state with
+                    Stop =
+                        { state.Stop with
+                            StartTime = DateTime.Now }
+                    RunningStatus = RunningStatus.Running }
+
+            let f' = f state.Commands state.Stop.StartTime
+
+            let totalDuration =
+                state.Commands |> List.map Command.duration |> List.fold (+) TimeSpan.Zero
+
+            let intervalId =
+                setInterval
+                    (fun _ ->
+                        let elapsedTime = f' state.Stop.Acc DateTime.Now
+                        (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay elapsedTime
+
+                        currentCommand state.Commands state.Stop.StartTime state.Stop.Acc DateTime.Now
+                        |> function
+                            | Command.CountDown(_, _, color, bgcolor, message) -> (color, bgcolor, message)
+                            | Command.CountUp(_, _, color, bgcolor, message) -> (color, bgcolor, message)
+                        |> fun (color, bgcolor, message) ->
+                            document.body.setAttribute (
+                                "style",
+                                (sprintf "color: %s; background-color: %s;" color bgcolor)
+                            )
+
+                            (document.getElementById "messageArea").innerText <- message
+
+                        if (DateTime.Now - state.Stop.StartTime + state.Stop.Acc) > totalDuration then
+                            match state.Commands |> List.last with
+                            | Command.CountDown(_, _, _, _, _) -> TimeSpan.Zero
+                            | Command.CountUp(duration, _, _, _, _) -> duration
+                            |> fun x -> (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay x
+
+                            (document.getElementById "timerArea").classList.add "finished"
+                            (document.getElementById "messageArea").classList.add "finished"
+
+                            state <-
+                                { state with
+                                    RunningStatus = RunningStatus.Finished }
+
+                            clearInterval state.IntervalId)
+                    10
+
+            state <- { state with IntervalId = intervalId }
+        | _ -> ()
+
+    let stop () =
+        match state.RunningStatus with
+        | RunningStatus.Running ->
+            clearInterval state.IntervalId
+
+            state <-
+                { state with
+                    Stop =
+                        { state.Stop with
+                            Acc = state.Stop.Acc + (DateTime.Now - state.Stop.StartTime) }
+                    RunningStatus = RunningStatus.Stopping }
+        | _ -> ()
+
+    let reset event =
+        match state.RunningStatus with
+        | RunningStatus.Running -> stop ()
+        | RunningStatus.Stopping
+        | RunningStatus.Finished ->
+            (document.getElementById "timerArea").classList.remove "finished"
+            (document.getElementById "messageArea").classList.remove "finished"
+            (document.getElementById "timerArea").innerText <- ""
+            (document.getElementById "messageArea").innerText <- ""
+            document.body.removeAttribute "style"
+            state <- initState
+        | _ -> ()
