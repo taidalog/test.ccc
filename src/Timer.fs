@@ -93,7 +93,7 @@ module Timer' =
                     Commands = commands
                     WakeLock =
                         if WakeLockAPI.isSupported () then
-                            printfn "locking at %s" (DateTime.Now.ToString())
+                            printfn $"locking at %s{DateTime.Now.ToString()}"
 
                             try
                                 WakeLockAPI.lock () |> Some
@@ -104,16 +104,16 @@ module Timer' =
                             None
                     RunningStatus = RunningStatus.Running }
 
-            printfn "%b" state.WakeLock.IsSome
+            let outputArea = document.getElementById "outputArea"
 
-            (document.getElementById "outputArea").innerText <-
-                match state.WakeLock with
-                | Some _ ->
-                    if WakeLockAPI.isSupported () then
-                        "画面起動ロック API により、タイマー動作中は画面がスリープしません。"
-                    else
-                        ""
-                | None -> ""
+            match state.WakeLock with
+            | Some x ->
+                if not x?released then
+                    printfn $"locked at %s{DateTime.Now.ToString()}"
+                    outputArea.innerText <- "画面起動ロック API により、タイマー動作中は画面がスリープしません。"
+            | None ->
+                printfn "failed to lock ...."
+                outputArea.innerText <- ""
 
             let f' = f state.Commands state.Stop.StartTime
 
@@ -149,7 +149,7 @@ module Timer' =
 
                             match state.WakeLock with
                             | Some x ->
-                                printfn "releasing at %s" (DateTime.Now.ToString())
+                                printfn $"releasing at %s{DateTime.Now.ToString()}"
                                 WakeLockAPI.release x
                             | None -> printfn "doing nothing..."
 
@@ -158,7 +158,6 @@ module Timer' =
                                     WakeLock = None
                                     RunningStatus = RunningStatus.Finished }
 
-                            printfn "%b" state.WakeLock.IsNone
                             (document.getElementById "outputArea").innerText <- ""
 
                             clearInterval state.IntervalId)
@@ -241,13 +240,12 @@ module Timer' =
 
             match state.WakeLock with
             | Some x ->
-                printfn "releasing at %s" (DateTime.Now.ToString())
+                printfn $"releasing at %s{DateTime.Now.ToString()}"
                 WakeLockAPI.release x
             | None -> printfn "doing nothing..."
 
             state <- initState
 
-            printfn "%b" state.WakeLock.IsNone
             (document.getElementById "outputArea").innerText <- ""
         | _ -> ()
 
@@ -262,18 +260,20 @@ module Timer' =
                         { state with
                             WakeLock =
                                 try
-                                    printfn "locking at %s" (DateTime.Now.ToString())
+                                    printfn $"locking at %s{DateTime.Now.ToString()}"
                                     WakeLockAPI.lock () |> Some
                                 with _ ->
                                     None }
-            | _ -> ()
 
-            (document.getElementById "outputArea").innerText <-
-                match state.WakeLock with
-                | Some _ ->
-                    if WakeLockAPI.isSupported () then
-                        "画面起動ロック API により、タイマー動作中は画面がスリープしません。"
-                    else
-                        ""
-                | None -> ""
+                    let outputArea = document.getElementById "outputArea"
+
+                    match state.WakeLock with
+                    | Some x ->
+                        if not x?released then
+                            printfn $"locked at %s{DateTime.Now.ToString()}"
+                            outputArea.innerText <- "画面起動ロック API により、タイマー動作中は画面がスリープしません。"
+                    | None ->
+                        printfn "failed to lock ...."
+                        outputArea.innerText <- ""
+            | _ -> ()
     )
