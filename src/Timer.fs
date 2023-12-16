@@ -1,4 +1,4 @@
-// ccc Version 0.3.0
+// ccc Version 0.4.0
 // https://github.com/taidalog/ccc
 // Copyright (c) 2023 taidalog
 // This software is licensed under the MIT License.
@@ -9,7 +9,9 @@ open System
 open Browser.Dom
 open Browser.Types
 open Fable.Core
+open Fable.Core.JsInterop
 open Command
+open WakeLockAPI
 open Fermata
 
 module Timer' =
@@ -25,6 +27,7 @@ module Timer' =
         { Stop: TimeAcc
           IntervalId: int
           Commands: Command list
+          WakeLock: JS.Promise<obj> option
           RunningStatus: RunningStatus }
 
     [<Emit("setInterval($0, $1)")>]
@@ -39,6 +42,7 @@ module Timer' =
               Acc = TimeSpan.Zero }
           IntervalId = -1
           Commands = []
+          WakeLock = None
           RunningStatus = RunningStatus.NotStarted }
 
     let initState =
@@ -47,6 +51,7 @@ module Timer' =
               Acc = TimeSpan.Zero }
           IntervalId = -1
           Commands = []
+          WakeLock = None
           RunningStatus = RunningStatus.NotStarted }
 
     let timeSpanToDisplay (timeSpan: TimeSpan) =
@@ -86,7 +91,29 @@ module Timer' =
                             StartTime = DateTime.Now
                             Acc = TimeSpan.Zero }
                     Commands = commands
+                    WakeLock =
+                        if WakeLockAPI.isSupported () then
+                            printfn $"locking at %s{DateTime.Now.ToString()}"
+
+                            try
+                                WakeLockAPI.lock () |> Some
+                            with _ ->
+                                None
+                        else
+                            printfn "failed to lock..."
+                            None
                     RunningStatus = RunningStatus.Running }
+
+            let outputArea = document.getElementById "outputArea"
+
+            match state.WakeLock with
+            | Some x ->
+                if not x?released then
+                    printfn $"locked at %s{DateTime.Now.ToString()}"
+                    outputArea.innerText <- "画面起動ロック API により、タイマー動作中は画面がスリープしません。"
+            | None ->
+                printfn "failed to lock ...."
+                outputArea.innerText <- ""
 
             let f' = f state.Commands state.Stop.StartTime
 
@@ -120,9 +147,18 @@ module Timer' =
                             (document.getElementById "timerArea").classList.add "finished"
                             (document.getElementById "messageArea").classList.add "finished"
 
+                            match state.WakeLock with
+                            | Some x ->
+                                printfn $"releasing at %s{DateTime.Now.ToString()}"
+                                WakeLockAPI.release x
+                            | None -> printfn "doing nothing..."
+
                             state <-
                                 { state with
+                                    WakeLock = None
                                     RunningStatus = RunningStatus.Finished }
+
+                            (document.getElementById "outputArea").innerText <- ""
 
                             clearInterval state.IntervalId)
                     10
@@ -201,5 +237,43 @@ module Timer' =
             (document.getElementById "timerArea").innerText <- ""
             (document.getElementById "messageArea").innerText <- ""
             document.body.removeAttribute "style"
+
+            match state.WakeLock with
+            | Some x ->
+                printfn $"releasing at %s{DateTime.Now.ToString()}"
+                WakeLockAPI.release x
+            | None -> printfn "doing nothing..."
+
             state <- initState
+
+            (document.getElementById "outputArea").innerText <- ""
         | _ -> ()
+
+    document.addEventListener (
+        "visibilitychange",
+        fun _ ->
+            match state.RunningStatus with
+            | RunningStatus.Running
+            | RunningStatus.Stopping ->
+                if WakeLockAPI.isSupported () then
+                    state <-
+                        { state with
+                            WakeLock =
+                                try
+                                    printfn $"locking at %s{DateTime.Now.ToString()}"
+                                    WakeLockAPI.lock () |> Some
+                                with _ ->
+                                    None }
+
+                    let outputArea = document.getElementById "outputArea"
+
+                    match state.WakeLock with
+                    | Some x ->
+                        if not x?released then
+                            printfn $"locked at %s{DateTime.Now.ToString()}"
+                            outputArea.innerText <- "画面起動ロック API により、タイマー動作中は画面がスリープしません。"
+                    | None ->
+                        printfn "failed to lock ...."
+                        outputArea.innerText <- ""
+            | _ -> ()
+    )
