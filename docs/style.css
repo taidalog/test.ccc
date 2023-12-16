@@ -107,8 +107,10 @@ main>form>label {
 }
 
 output {
-    height: 1rem;
+    margin-top: 0.5rem;
+    min-height: 1rem;
     display: block;
+    text-align: center;
 }
 
 div.timer-area {
