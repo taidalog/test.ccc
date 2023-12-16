@@ -106,6 +106,15 @@ module Timer' =
 
             printfn "%b" state.WakeLock.IsSome
 
+            (document.getElementById "outputArea").innerText <-
+                match state.WakeLock with
+                | Some _ ->
+                    if WakeLockAPI.isSupported () then
+                        "画面起動ロック API により、タイマー動作中は画面がスリープしません。"
+                    else
+                        ""
+                | None -> ""
+
             let f' = f state.Commands state.Stop.StartTime
 
             let totalDuration =
@@ -150,6 +159,7 @@ module Timer' =
                                     RunningStatus = RunningStatus.Finished }
 
                             printfn "%b" state.WakeLock.IsNone
+                            (document.getElementById "outputArea").innerText <- ""
 
                             clearInterval state.IntervalId)
                     10
@@ -238,4 +248,5 @@ module Timer' =
             state <- initState
 
             printfn "%b" state.WakeLock.IsNone
+            (document.getElementById "outputArea").innerText <- ""
         | _ -> ()
