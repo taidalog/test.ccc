@@ -14,7 +14,7 @@ ccc: customizable command countdown-timer.
 
 1. Visit [ccc](https://taidalog.github.io/ccc/).
 1. Type or paste commands.
-1. Press `Enter` to start the timer.
+1. Press `Enter` to start the timer. Press `Escape` to stop the timer. Press `Delete` to reset the timer.
 
 ## Commands
 
@@ -80,7 +80,7 @@ Countdown for 5 minutes, with a message "Presentation." below the timer. Then co
 
 ## Known Issue
 
--
+- The screen can't keep waking while the time is running if you use Firefox. This is because [Screen Wake Lock API](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API) is not supported on Firefox.
 
 ## Release Notes
 
