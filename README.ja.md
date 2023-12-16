@@ -1,6 +1,6 @@
 # ccc
 
-Version 0.3.0
+Version 0.4.0
 
 [English README](README.md)
 
@@ -14,7 +14,7 @@ ccc: customizable command countdown-timer.
 
 1. [ccc](https://taidalog.github.io/ccc/) にアクセスする。
 1. コマンドエリアにコマンドを入力するか貼り付ける。
-1. `Enter` キーを押す。そうするとタイマーが起動する。
+1. `Enter` キーを押す。そうするとタイマーが起動する。`Escape` キーで一時停止、`Delete` キーでリセットができる。
 
 ## コマンド
 
@@ -80,7 +80,7 @@ down 5:00 --message Presentation. up 120 -bg #aaccff -m Questions and answers. -
 
 ## 既知の問題
 
--
+- Firefox を使用している場合、タイマーの動作中に画面が暗くなるのを防止できない。これは[画面起動ロック API](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API)が Firefox でサポートされていないため。
 
 ## リリースノート
 
