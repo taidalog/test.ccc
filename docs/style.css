@@ -108,7 +108,6 @@ main>form>label {
 
 output {
     margin-top: 0.5rem;
-    min-height: 1rem;
     display: block;
     text-align: center;
 }
