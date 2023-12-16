@@ -254,28 +254,26 @@ module Timer' =
     document.addEventListener (
         "visibilitychange",
         fun _ ->
-            (state <-
-                { state with
-                    WakeLock =
-                        if WakeLockAPI.isSupported () && state.RunningStatus = RunningStatus.Running then
-                            printfn "locking at %s" (DateTime.Now.ToString())
+            match state.RunningStatus with
+            | RunningStatus.Running
+            | RunningStatus.Stopping ->
+                if WakeLockAPI.isSupported () then
+                    state <-
+                        { state with
+                            WakeLock =
+                                try
+                                    printfn "locking at %s" (DateTime.Now.ToString())
+                                    WakeLockAPI.lock () |> Some
+                                with _ ->
+                                    None }
+            | _ -> ()
 
-                            try
-                                WakeLockAPI.lock () |> Some
-                            with _ ->
-                                None
-                        else
-                            printfn "failed to lock..."
-                            None }
-
-             printfn "%b" state.WakeLock.IsSome
-
-             (document.getElementById "outputArea").innerText <-
-                 match state.WakeLock with
-                 | Some _ ->
-                     if WakeLockAPI.isSupported () then
-                         "画面起動ロック API により、タイマー動作中は画面がスリープしません。"
-                     else
-                         ""
-                 | None -> "")
+            (document.getElementById "outputArea").innerText <-
+                match state.WakeLock with
+                | Some _ ->
+                    if WakeLockAPI.isSupported () then
+                        "画面起動ロック API により、タイマー動作中は画面がスリープしません。"
+                    else
+                        ""
+                | None -> ""
     )
