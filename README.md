@@ -34,16 +34,28 @@ ccc: customizable command countdown-timer.
 ## Examples
 
 ```
+down 5:00
+```
+
+Countdown for 5 minutes
+
+```
+up 5:00
+```
+
+Count up for 5 minutes
+
+```
+down 5:00 down 1:30
+```
+
+Countdown for 5 minutes, then countdown for 1 minute and 30 seconds.
+
+```
 down 5:00 --message hey
 ```
 
 Countdown for 5 minutes, with a message "hey" below the timer.
-
-```
-down 5:00 down 90
-```
-
-Countdown for 5 minutes, with no message below the timer. Then countdown for 90 seconds (1 minute and 30 seconds), with no message.
 
 ```
 down 5:00 --color #222266 --background #aaccff --message hello
