@@ -5,6 +5,42 @@
   This software is licensed under the MIT License.
   https://github.com/taidalog/ccc/blob/main/LICENSE
 */
+:root {
+    --background-color: #ffffff;
+    --text-color: #444444;
+    /* 9.74, AAA */
+    --h1-color: #65a2ac;
+    /* 2.87, ! */
+    --h2-color: #778899;
+    /* 3.64, AA */
+    --pale-color: #888888;
+    /* 3.54, ! */
+    --a-color: #447f88;
+    /* 4.53, AA */
+    --a-visited-color: #754488;
+    /* 7.15, AAA */
+    --help-window-background-color: var(--background-color);
+    --help-window-box-shadow: #999999;
+}
+
+@media (prefers-color-scheme: dark) {
+    :root {
+        --background-color: #142022;
+        --text-color: #ffffff;
+        /* 16.67, AAA */
+        --h1-color: #65a2ac;
+        /* 5.81, AAA */
+        --h2-color: #a6bed6;
+        /* 8.70, AAA */
+        --pale-color: #888888;
+        /* 4.70, AA */
+        --a-color: #58a5b0;
+        /* 5.89, AA */
+        --a-visited-color: #bb6cd9;
+        /* 4.97, AA */
+    }
+}
+
 html,
 body {
     height: 100%;
@@ -14,7 +50,9 @@ body {
 html {
     font-family: 'Noto Sans JP', sans-serif;
     font-weight: 400;
-    color: #444444;
+    color: var(--text-color);
+    background-color: var(--background-color);
+    color: var(--text-color);
 }
 
 body {
@@ -23,14 +61,14 @@ body {
 }
 
 h1 {
-    color: #65a2ac;
+    color: var(--h1-color);
     font-family: 'Zen Kurenaido', sans-serif;
     margin: 0;
 }
 
 h2 {
     margin: 0;
-    color: lightslategray;
+    color: var(--h2-color);
 }
 
 header,
@@ -62,8 +100,8 @@ main>form {
     font-family: 'Noto Sans Mono', monospace;
     font-size: 1.25rem;
     width: calc(100% - 1.5rem);
-    color: #ffffff;
-    background-color: #444444;
+    color: var(--background-color);
+    background-color: var(--text-color);
     border-radius: 10px;
     padding: 0.5rem 0.5rem 0.5rem 1rem;
 }
@@ -72,8 +110,8 @@ main>form>input {
     font-family: 'Noto Sans Mono', monospace;
     font-size: 1.25rem;
     width: calc(100% - 1.5rem);
-    color: #ffffff;
-    background-color: #444444;
+    color: var(--background-color);
+    background-color: var(--text-color);
     border: none;
 }
 
@@ -134,7 +172,7 @@ div.message-area.finished {
 }
 
 footer {
-    color: #888888;
+    color: var(--pale-color);
     width: 90%;
     margin: 20px auto;
     margin-top: 40px;
@@ -148,12 +186,12 @@ footer>div {
 }
 
 footer a {
-    color: #447f88;
+    color: var(--a-color);
     text-decoration: none;
 }
 
 footer a:visited {
-    color: #754488;
+    color: var(--a-visited-color);
 }
 
 @media (max-width: 799px) {
@@ -193,8 +231,8 @@ div.help-window {
 
 div.help-window.active {
     display: block;
-    background-color: #ffffff;
-    color: #444444;
+    background-color: var(--help-window-background-color);
+    color: var(--text-color);
     opacity: 0.95;
     width: fit-content;
     height: fit-content;
@@ -208,17 +246,17 @@ div.help-window.active {
     right: 0;
     margin: auto;
     padding: 0.5rem 2rem 2rem 2rem;
-    box-shadow: 0px 0px 5px 1px #999;
+    box-shadow: 0px 0px 5px 1px var(--help-window-box-shadow);
     overflow-y: auto;
     scrollbar-width: thin;
 }
 
 div.help-window a {
-    color: #447f88;
+    color: var(--a-color);
 }
 
 div.help-window a:visited {
-    color: #754488;
+    color: var(--a-visited-color);
 }
 
 span.material-symbols-outlined:hover {
@@ -227,6 +265,6 @@ span.material-symbols-outlined:hover {
 }
 
 span.material-symbols-outlined.help-close:hover {
-    color: #ffffff;
-    background-color: #444444;
+    color: var(--background-color);
+    background-color: var(--text-color);
 }
