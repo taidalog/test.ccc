@@ -79,7 +79,7 @@ module CommandM =
             if Regex.IsMatch(input, pattern) then
                 Regex.Match(input, pattern).Groups.[2].Value
             else
-                "#333333"
+                ""
 
         let bgcolor =
             let pattern = "(--background|-bg) (#[0-9A-Fa-f]{6}|#[0-9A-Fa-f]{3})"
@@ -87,7 +87,7 @@ module CommandM =
             if Regex.IsMatch(input, pattern) then
                 Regex.Match(input, pattern).Groups.[2].Value
             else
-                "#ffffff"
+                ""
 
         let message =
             let pattern = "(--message|-m)"
