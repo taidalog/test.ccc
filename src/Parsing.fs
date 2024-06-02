@@ -81,10 +81,22 @@ module Parsing =
                  <&> neg (string' "--background")
                  <&> neg (string' "-bg"))
 
-            (many (any <+&> withoutOptions))
+            let withOptions =
+                (pos (string' "--color")
+                 <|> pos (string' "-c")
+                 <|> pos (string' "--background")
+                 <|> pos (string' "-bg"))
+
+            let withOptionsOrEnd = withOptions <|> end'
+
+            (many (any <+&> withoutOptions)) <&> (any <+&> withOptionsOrEnd)
 
         map'
-            (List.map string >> String.concat "" >> (fun x -> x.Trim()) >> Options.Message)
+            (fun (cs, c) ->
+                cs @ [ c ]
+                |> List.map string
+                |> String.concat ""
+                |> fun x -> x.Trim() |> Options.Message)
             (name <&> spaces <&+> body')
 
     let options: Parser<Options list> =

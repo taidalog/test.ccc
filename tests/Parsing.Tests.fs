@@ -180,14 +180,14 @@ let ``backgroundOption 7`` () =
 
 [<Fact>]
 let ``messageOption 1`` () =
-    let expected = Ok(Options.Message "hey he", State("--message hey hey", 16))
+    let expected = Ok(Options.Message "hey hey", State("--message hey hey", 17))
     let actual = messageOption (State("--message hey hey", 0))
     Assert.Equal(expected, actual)
 
 [<Fact>]
 let ``messageOption 2`` () =
     let expected =
-        Ok(Options.Message "hey hey", State("--message hey hey --color #65a2ac", 17))
+        Ok(Options.Message "hey hey", State("--message hey hey --color #65a2ac", 18))
 
     let actual = messageOption (State("--message hey hey --color #65a2ac", 0))
     Assert.Equal(expected, actual)
@@ -195,7 +195,7 @@ let ``messageOption 2`` () =
 [<Fact>]
 let ``downCommand 1`` () =
     let expected =
-        Ok(CommandAndOptions.Down(TimeSpan(0, 5, 0), [ Options.Message "he" ]), State("down 5:00 -m hey", 15))
+        Ok(CommandAndOptions.Down(TimeSpan(0, 5, 0), [ Options.Message "hey" ]), State("down 5:00 -m hey", 16))
 
     let actual = downCommand (State("down 5:00 -m hey", 0))
 
@@ -209,9 +209,9 @@ let ``downCommand 2`` () =
                 TimeSpan(0, 5, 0),
                 [ Options.Color "#ffffff"
                   Options.Background "#65a2ac"
-                  Options.Message "hey he" ]
+                  Options.Message "hey hey" ]
             ),
-            State("down 5:00 --color #ffffff --background #65a2ac --message hey hey", 63)
+            State("down 5:00 --color #ffffff --background #65a2ac --message hey hey", 64)
         )
 
     let actual =
@@ -222,7 +222,7 @@ let ``downCommand 2`` () =
 [<Fact>]
 let ``upCommand 1`` () =
     let expected =
-        Ok(CommandAndOptions.Up(TimeSpan(0, 5, 0), [ Options.Message "he" ]), State("up 5:00 -m hey", 13))
+        Ok(CommandAndOptions.Up(TimeSpan(0, 5, 0), [ Options.Message "hey" ]), State("up 5:00 -m hey", 14))
 
     let actual = upCommand (State("up 5:00 -m hey", 0))
 
@@ -236,9 +236,9 @@ let ``upCommand 2`` () =
                 TimeSpan(0, 5, 0),
                 [ Options.Color "#ffffff"
                   Options.Background "#65a2ac"
-                  Options.Message "hey he" ]
+                  Options.Message "hey hey" ]
             ),
-            State("up 5:00 --color #ffffff --background #65a2ac --message hey hey", 61)
+            State("up 5:00 --color #ffffff --background #65a2ac --message hey hey", 62)
         )
 
     let actual =
@@ -254,9 +254,9 @@ let ``command 1`` () =
                 TimeSpan(0, 5, 0),
                 [ Options.Color "#ffffff"
                   Options.Background "#65a2ac"
-                  Options.Message "hey he" ]
+                  Options.Message "hey hey" ]
             ),
-            State("down 5:00 --color #ffffff --background #65a2ac --message hey hey", 63)
+            State("down 5:00 --color #ffffff --background #65a2ac --message hey hey", 64)
         )
 
     let actual =
@@ -272,9 +272,9 @@ let ``command 2`` () =
                 TimeSpan(0, 5, 0),
                 [ Options.Color "#ffffff"
                   Options.Background "#65a2ac"
-                  Options.Message "hey he" ]
+                  Options.Message "hey hey" ]
             ),
-            State("up 5:00 --color #ffffff --background #65a2ac --message hey hey", 61)
+            State("up 5:00 --color #ffffff --background #65a2ac --message hey hey", 62)
         )
 
     let actual =
