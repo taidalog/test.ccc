@@ -194,25 +194,25 @@ module Command2 =
         | Command2.Down v -> v.Duration
         | Command2.Up v -> v.Duration
 
-    let delay (x: Command2) : TimeSpan option =
+    let delay (x: Command2) : TimeSpan =
         match x with
-        | Command2.Down v -> Some(v.Delay)
-        | Command2.Up v -> Some(v.Delay)
+        | Command2.Down v -> v.Delay
+        | Command2.Up v -> v.Delay
 
-    let color (x: Command2) : string option =
+    let color (x: Command2) : string =
         match x with
-        | Command2.Down v -> Some(v.Color)
-        | Command2.Up v -> Some(v.Color)
+        | Command2.Down v -> v.Color
+        | Command2.Up v -> v.Color
 
-    let background (x: Command2) : string option =
+    let background (x: Command2) : string =
         match x with
-        | Command2.Down v -> Some(v.Background)
-        | Command2.Up v -> Some(v.Background)
+        | Command2.Down v -> v.Background
+        | Command2.Up v -> v.Background
 
-    let message (x: Command2) : string option =
+    let message (x: Command2) : string =
         match x with
-        | Command2.Down v -> Some(v.Message)
-        | Command2.Up v -> Some(v.Message)
+        | Command2.Down v -> v.Message
+        | Command2.Up v -> v.Message
 
     let defaultDown: DownCommand =
         { Duration = TimeSpan.Zero
