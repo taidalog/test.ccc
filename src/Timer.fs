@@ -1,4 +1,4 @@
-// ccc Version 0.5.0
+// ccc Version 0.6.0
 // https://github.com/taidalog/ccc
 // Copyright (c) 2023-2024 taidalog
 // This software is licensed under the MIT License.
@@ -6,13 +6,14 @@
 namespace Ccc
 
 open System
+open System.Text.RegularExpressions
 open Browser.Dom
 open Browser.Types
 open Fable.Core
 open Fable.Core.JsInterop
-open Command
+open Command2
 open WakeLockAPI
-open Fermata
+open Fermata.ParserCombinators
 
 module Timer' =
     type RunningStatus =
@@ -26,7 +27,7 @@ module Timer' =
     type State =
         { Stop: TimeAcc
           IntervalId: int
-          Commands: Command list
+          Commands: Command2 list
           WakeLock: JS.Promise<obj> option
           RunningStatus: RunningStatus }
 
@@ -55,23 +56,43 @@ module Timer' =
           RunningStatus = RunningStatus.NotStarted }
 
     let timeSpanToDisplay (timeSpan: TimeSpan) =
-        let h = timeSpan.Hours |> string |> String.padLeft 2 '0'
-        let m = timeSpan.Minutes |> string |> String.padLeft 2 '0'
-        let s = timeSpan.Seconds |> string |> String.padLeft 2 '0'
-        let ms = timeSpan.Milliseconds |> string |> String.padLeft 3 '0'
-        $"""%s{h}:%s{m}:%s{s}<span class="decimals">.%s{ms}</span>"""
+        $"""%02d{timeSpan.Hours}:%02d{timeSpan.Minutes}:%02d{timeSpan.Seconds}<span class="decimals">.%03d{timeSpan.Milliseconds}</span>"""
 
-    let currentCommand (commands: Command list) (startTime: DateTime) (acc: TimeSpan) (t: DateTime) : Command =
+    let currentCommand (commands: Command2 list) (startTime: DateTime) (acc: TimeSpan) (t: DateTime) : Command2 =
         let passed = t - startTime + acc
-        commands |> List.findBack (fun x -> Command.delay x <= passed)
+        commands |> List.findBack (fun x -> Command2.delay x <= passed)
 
-    let f (commands: Command list) (startTime: DateTime) (acc: TimeSpan) (t: DateTime) : TimeSpan =
+    let f (commands: Command2 list) (startTime: DateTime) (acc: TimeSpan) (t: DateTime) : TimeSpan =
         let passed = t - startTime + acc
         let c = currentCommand commands startTime acc t
 
         match c with
-        | Command.CountDown(duration, delay, _, _, _) -> duration - (passed - delay)
-        | Command.CountUp(_, delay, _, _, _) -> passed - delay
+        | Command2.Down v -> v.Duration - (passed - v.Delay)
+        | Command2.Up v -> passed - v.Delay
+
+    let split (input: string) : string array =
+        input
+        |> fun x -> Regex.Split(x, "(?=down \d|up \d)")
+        |> Array.map (fun x -> x.Trim())
+        |> Array.filter (String.IsNullOrWhiteSpace >> not)
+
+    let parse (input: string) =
+        Parsing.command (Parsers.State(input, 0))
+
+    let validate input =
+        let tmp = input |> split |> Array.map parse
+
+        if
+            Array.exists
+                (fun x ->
+                    match x with
+                    | Ok _ -> false
+                    | Error _ -> true)
+                tmp
+        then
+            Error tmp
+        else
+            Ok tmp
 
     let start () =
         match state.RunningStatus with
@@ -80,90 +101,118 @@ module Timer' =
             (document.getElementById "timerArea").classList.remove "finished"
             (document.getElementById "messageArea").classList.remove "finished"
 
-            let commands =
-                (document.getElementById "commandInput" :?> HTMLInputElement).value
-                |> Command.ofString
+            match (document.getElementById "commandInput" :?> HTMLInputElement).value |> validate with
+            | Error xs ->
+                let msg =
+                    xs
+                    |> Array.indexed
+                    |> Array.filter (fun (_, x) ->
+                        match x with
+                        | Error _ -> true
+                        | Ok _ -> false)
+                    |> Array.map (fun (i, x) ->
+                        match x with
+                        | Error(e, Parsers.State(s, p)) -> $"%d{i + 1} つ目: %s{s}"
+                        //| Error(e, Parsers.State(s, p)) -> $"%d{i + 1}: %s{s}, %s{e} at %d{p + 1}"
+                        | Ok _ -> "")
+                    |> String.concat "<br>"
+                    |> (+) "以下のコマンドに誤りがあります。<br>"
 
-            state <-
-                { initState with
-                    Stop =
-                        { initState.Stop with
-                            StartTime = DateTime.Now
-                            Acc = TimeSpan.Zero }
-                    Commands = commands
-                    WakeLock =
-                        if WakeLockAPI.isSupported () then
-                            printfn $"locking at %s{DateTime.Now.ToString()}"
+                printfn "%s" msg
+                (document.getElementById "validationArea").innerHTML <- msg
+            | Ok xs ->
+                (document.getElementById "validationArea").innerHTML <- ""
 
-                            try
-                                WakeLockAPI.lock () |> Some
-                            with _ ->
+                let commands: Command2 list =
+                    xs
+                    |> Array.map (fun x ->
+                        match x with
+                        | Ok(v, _) -> Command2.build' v
+                        | Error _ -> Command2.Down(Command2.defaultDown) //never comes here.
+                    )
+                    |> Array.toList
+                    |> Command2.withDelay
+
+                state <-
+                    { initState with
+                        Stop =
+                            { initState.Stop with
+                                StartTime = DateTime.Now
+                                Acc = TimeSpan.Zero }
+                        Commands = commands
+                        WakeLock =
+                            if WakeLockAPI.isSupported () then
+                                printfn $"locking at %s{DateTime.Now.ToString()}"
+
+                                try
+                                    WakeLockAPI.lock () |> Some
+                                with _ ->
+                                    None
+                            else
+                                printfn "failed to lock..."
                                 None
-                        else
-                            printfn "failed to lock..."
-                            None
-                    RunningStatus = RunningStatus.Running }
+                        RunningStatus = RunningStatus.Running }
 
-            let outputArea = document.getElementById "outputArea"
+                let outputArea = document.getElementById "outputArea"
 
-            match state.WakeLock with
-            | Some x ->
-                if not x?released then
-                    printfn $"locked at %s{DateTime.Now.ToString()}"
-                    outputArea.innerText <- "画面起動ロック API により、タイマー動作中は画面がスリープしません。"
-            | None ->
-                printfn "failed to lock ...."
-                outputArea.innerText <- ""
+                match state.WakeLock with
+                | Some x ->
+                    if not x?released then
+                        printfn $"locked at %s{DateTime.Now.ToString()}"
+                        outputArea.innerText <- "画面起動ロック API により、タイマー動作中は画面がスリープしません。"
+                | None ->
+                    printfn "failed to lock ...."
+                    outputArea.innerText <- ""
 
-            let f' = f state.Commands state.Stop.StartTime
+                let f' = f state.Commands state.Stop.StartTime
 
-            let totalDuration =
-                state.Commands |> List.map Command.duration |> List.fold (+) TimeSpan.Zero
+                let totalDuration =
+                    state.Commands |> List.map Command2.duration |> List.fold (+) TimeSpan.Zero
 
-            let intervalId =
-                setInterval
-                    (fun _ ->
-                        let elapsedTime = f' state.Stop.Acc DateTime.Now
-                        (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay elapsedTime
+                let intervalId =
+                    setInterval
+                        (fun _ ->
+                            let elapsedTime = f' state.Stop.Acc DateTime.Now
+                            (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay elapsedTime
 
-                        currentCommand state.Commands state.Stop.StartTime state.Stop.Acc DateTime.Now
-                        |> function
-                            | Command.CountDown(_, _, color, bgcolor, message) -> (color, bgcolor, message)
-                            | Command.CountUp(_, _, color, bgcolor, message) -> (color, bgcolor, message)
-                        |> fun (color, bgcolor, message) ->
-                            document.body.setAttribute (
-                                "style",
-                                (sprintf "color: %s; background-color: %s;" color bgcolor)
-                            )
+                            currentCommand state.Commands state.Stop.StartTime state.Stop.Acc DateTime.Now
+                            |> function
+                                | Command2.Down v -> (v.Color, v.Background, v.Message)
+                                | Command2.Up v -> (v.Color, v.Background, v.Message)
+                            |> fun (color, bgcolor, message) ->
+                                document.body.setAttribute (
+                                    "style",
+                                    (sprintf "color: %s; background-color: %s;" color bgcolor)
+                                )
 
-                            (document.getElementById "messageArea").innerText <- message
+                                (document.getElementById "messageArea").innerText <- message
 
-                        if (DateTime.Now - state.Stop.StartTime + state.Stop.Acc) > totalDuration then
-                            match state.Commands |> List.last with
-                            | Command.CountDown(_, _, _, _, _) -> TimeSpan.Zero
-                            | Command.CountUp(duration, _, _, _, _) -> duration
-                            |> fun x -> (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay x
+                            if (DateTime.Now - state.Stop.StartTime + state.Stop.Acc) > totalDuration then
+                                match state.Commands |> List.last with
+                                | Command2.Down _ -> TimeSpan.Zero
+                                | Command2.Up v -> v.Duration
+                                |> fun x -> (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay x
 
-                            (document.getElementById "timerArea").classList.add "finished"
-                            (document.getElementById "messageArea").classList.add "finished"
+                                (document.getElementById "timerArea").classList.add "finished"
+                                (document.getElementById "messageArea").classList.add "finished"
 
-                            match state.WakeLock with
-                            | Some x ->
-                                printfn $"releasing at %s{DateTime.Now.ToString()}"
-                                WakeLockAPI.release x
-                            | None -> printfn "doing nothing..."
+                                match state.WakeLock with
+                                | Some x ->
+                                    printfn $"releasing at %s{DateTime.Now.ToString()}"
+                                    WakeLockAPI.release x
+                                | None -> printfn "doing nothing..."
 
-                            state <-
-                                { state with
-                                    WakeLock = None
-                                    RunningStatus = RunningStatus.Finished }
+                                state <-
+                                    { state with
+                                        WakeLock = None
+                                        RunningStatus = RunningStatus.Finished }
 
-                            (document.getElementById "outputArea").innerText <- ""
+                                (document.getElementById "outputArea").innerText <- ""
 
-                            clearInterval state.IntervalId)
-                    10
+                                clearInterval state.IntervalId)
+                        10
 
-            state <- { state with IntervalId = intervalId }
+                state <- { state with IntervalId = intervalId }
         | RunningStatus.Stopping ->
             state <-
                 { state with
@@ -175,7 +224,7 @@ module Timer' =
             let f' = f state.Commands state.Stop.StartTime
 
             let totalDuration =
-                state.Commands |> List.map Command.duration |> List.fold (+) TimeSpan.Zero
+                state.Commands |> List.map Command2.duration |> List.fold (+) TimeSpan.Zero
 
             let intervalId =
                 setInterval
@@ -185,8 +234,8 @@ module Timer' =
 
                         currentCommand state.Commands state.Stop.StartTime state.Stop.Acc DateTime.Now
                         |> function
-                            | Command.CountDown(_, _, color, bgcolor, message) -> (color, bgcolor, message)
-                            | Command.CountUp(_, _, color, bgcolor, message) -> (color, bgcolor, message)
+                            | Command2.Down v -> (v.Color, v.Background, v.Message)
+                            | Command2.Up v -> (v.Color, v.Background, v.Message)
                         |> fun (color, bgcolor, message) ->
                             document.body.setAttribute (
                                 "style",
@@ -197,8 +246,8 @@ module Timer' =
 
                         if (DateTime.Now - state.Stop.StartTime + state.Stop.Acc) > totalDuration then
                             match state.Commands |> List.last with
-                            | Command.CountDown(_, _, _, _, _) -> TimeSpan.Zero
-                            | Command.CountUp(duration, _, _, _, _) -> duration
+                            | Command2.Down _ -> TimeSpan.Zero
+                            | Command2.Up v -> v.Duration
                             |> fun x -> (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay x
 
                             (document.getElementById "timerArea").classList.add "finished"

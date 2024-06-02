@@ -1,4 +1,4 @@
-// ccc Version 0.5.0
+// ccc Version 0.6.0
 // https://github.com/taidalog/ccc
 // Copyright (c) 2023-2024 taidalog
 // This software is licensed under the MIT License.
@@ -9,8 +9,10 @@ open Browser.Dom
 open Browser.Types
 open Fable.Core
 open Fable.Core.JsInterop
-open Command
 open Timer'
+open System
+open System.Text.RegularExpressions
+open Fermata.ParserCombinators
 
 module App =
     let keyboardshortcut (e: KeyboardEvent) =
@@ -63,12 +65,105 @@ module App =
             // timer feature
             let commandInput = document.getElementById "commandInput" :?> HTMLInputElement
 
+            // real-time validation and preview
+            commandInput.oninput <-
+                fun _ ->
+                    if commandInput.value = "" then
+                        (document.getElementById "validationArea").innerHTML <- ""
+                        document.body.setAttribute ("style", """color: ""; background-color: "";""")
+                        (document.getElementById "messageArea").innerText <- ""
+                        (document.getElementById "timerArea").innerHTML <- ""
+
+                    // real-time validation
+                    let validated = commandInput.value |> split |> Array.map parse
+
+                    if
+                        Array.forall
+                            (fun x ->
+                                match x with
+                                | Ok _ -> true
+                                | Error _ -> false)
+                            validated
+                    then
+                        // all commands are valid.
+                        (document.getElementById "validationArea").innerHTML <- ""
+
+                        validated
+                        |> Array.head
+                        |> fun x ->
+                            match x with
+                            | Ok(v, _) ->
+                                let v' = Command2.build' v
+
+                                document.body.setAttribute (
+                                    "style",
+                                    ($"""color: %s{Command2.color v'}; background-color: %s{Command2.background v'};""")
+                                )
+
+                                (document.getElementById "messageArea").innerText <- Command2.message v'
+
+                                match v' with
+                                | Command2.Down v ->
+                                    (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay v.Duration
+                                | Command2.Up _ ->
+                                    (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay TimeSpan.Zero
+                            | Error _ -> ()
+                    else if
+                        // some of the input commands are invalid.
+                        Array.length validated > 1
+                    then
+                        validated
+                        |> Fermata.Array.tryFore
+                        |> function
+                            | None -> ()
+                            | Some v ->
+                                let msg =
+                                    v
+                                    |> Array.indexed
+                                    |> Array.filter (fun (_, x) ->
+                                        match x with
+                                        | Error _ -> true
+                                        | Ok _ -> false)
+                                    |> Array.map (fun (i, x) ->
+                                        match x with
+                                        | Error(e, Parsers.State(s, p)) -> $"%d{i + 1} つ目: %s{s}"
+                                        //| Error(e, Parsers.State(s, p)) -> $"%d{i + 1}: %s{s}, %s{e} at %d{p + 1}"
+                                        | Ok _ -> "")
+                                    |> String.concat "<br>"
+                                    |> (+) "以下のコマンドに誤りがあります。<br>"
+
+                                printfn "%s" msg
+                                (document.getElementById "validationArea").innerHTML <- msg
+
             (document.getElementById "inputArea").onsubmit <-
                 fun _ ->
                     commandInput.blur ()
 
-                    commandInput.value
-                    |> Command.ofString
+                    let tmp: Result<(Parsing.CommandAndOptions * Parsers.State), (string * Parsers.State)> array =
+                        commandInput.value
+                        |> fun x -> Regex.Split(x, "(?=down \d|up \d)")
+                        |> Array.map (fun x -> x.Trim())
+                        |> Array.filter (String.IsNullOrWhiteSpace >> not)
+                        |> Array.map (fun x -> Parsers.State(x, 0))
+                        |> Array.map Parsing.command
+
+                    if
+                        Array.exists
+                            (fun x ->
+                                match x with
+                                | Ok _ -> false
+                                | Error _ -> true)
+                            tmp
+                    then
+                        printfn "Input was invalid."
+
+                    tmp
+                    |> Array.map (fun x ->
+                        match x with
+                        | Ok(v, _) -> Command2.build' v
+                        | Error _ -> Command2.Down(Command2.defaultDown))
+                    |> Array.toList
+                    |> Command2.withDelay
                     |> List.map string
                     |> List.iter (printfn "%s")
 

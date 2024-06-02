@@ -3,6 +3,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Parsing.fs" />
     <Compile Include="Command.fs" />
     <Compile Include="WakeLockAPI.fs" />
     <Compile Include="Timer.fs" />
@@ -14,5 +15,6 @@
     <PackageReference Include="Fable.Core" Version="4.2.0" />
     <PackageReference Include="Fable.Promise" Version="3.2.0" />
     <PackageReference Include="Fermata" Version="0.7.0" />
+    <PackageReference Include="Fermata.ParserCombinators" Version="0.2.0" />
   </ItemGroup>
 </Project>

@@ -1,6 +1,6 @@
 # ccc
 
-Version 0.5.0
+Version 0.6.0
 
 [Japanese README](README.ja.md)
 
@@ -93,6 +93,12 @@ Countdown for 5 minutes, with a message "Presentation." below the timer. Then co
 ## Known Issue
 
 - The screen can't keep waking while the time is running if you use Firefox. This is because [Screen Wake Lock API](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API) is not supported on Firefox.
+
+## Breaking Changes
+
+### 0.6.0
+
+- The timer will not start when the input command is wrong.
 
 ## Release Notes
 
