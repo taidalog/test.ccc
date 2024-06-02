@@ -65,6 +65,29 @@ module App =
             // timer feature
             let commandInput = document.getElementById "commandInput" :?> HTMLInputElement
 
+            (document.getElementById "commandInput").oninput <-
+                fun _ ->
+                    match commandInput.value |> validate' with
+                    | Error xs ->
+                        let msg =
+                            xs
+                            |> Array.indexed
+                            |> Array.filter (fun (_, x) ->
+                                match x with
+                                | Error _ -> true
+                                | Ok _ -> false)
+                            |> Array.map (fun (i, x) ->
+                                match x with
+                                | Error(e, Parsers.State(s, p)) -> $"%d{i + 1} つ目: %s{s}"
+                                //| Error(e, Parsers.State(s, p)) -> $"%d{i + 1}: %s{s}, %s{e} at %d{p + 1}"
+                                | Ok _ -> "")
+                            |> String.concat "<br>"
+                            |> (+) "以下のコマンドに誤りがあります。<br>"
+
+                        printfn "%s" msg
+                        (document.getElementById "validationArea").innerHTML <- msg
+                    | Ok _ -> (document.getElementById "validationArea").innerHTML <- ""
+
             (document.getElementById "inputArea").onsubmit <-
                 fun _ ->
                     commandInput.blur ()

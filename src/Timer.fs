@@ -95,6 +95,21 @@ module Timer' =
         else
             Ok tmp
 
+    let validate' input =
+        let tmp = input |> split |> Array.map parse |> Array.fore
+
+        if
+            Array.exists
+                (fun x ->
+                    match x with
+                    | Ok _ -> false
+                    | Error _ -> true)
+                tmp
+        then
+            Error tmp
+        else
+            Ok tmp
+
     let start () =
         match state.RunningStatus with
         | RunningStatus.NotStarted
