@@ -71,18 +71,17 @@ module Timer' =
         | Command2.Down v -> v.Duration - (passed - v.Delay)
         | Command2.Up v -> passed - v.Delay
 
-    let validate
-        (input: string)
-        : Result<Result<(Parsing.CommandAndOptions * Parsers.State), (string * Parsers.State)> array, Result<(Parsing.CommandAndOptions *
-          Parsers.State), (string * Parsers.State)> array>
-        =
-        let tmp: Result<(Parsing.CommandAndOptions * Parsers.State), (string * Parsers.State)> array =
-            input
-            |> fun x -> Regex.Split(x, "(?=down \d|up \d)")
-            |> Array.map (fun x -> x.Trim())
-            |> Array.filter (String.IsNullOrWhiteSpace >> not)
-            |> Array.map (fun x -> Parsers.State(x, 0))
-            |> Array.map Parsing.command
+    let split (input: string) : string array =
+        input
+        |> fun x -> Regex.Split(x, "(?=down \d|up \d)")
+        |> Array.map (fun x -> x.Trim())
+        |> Array.filter (String.IsNullOrWhiteSpace >> not)
+
+    let parse (input: string) =
+        Parsing.command (Parsers.State(input, 0))
+
+    let validate input =
+        let tmp = input |> split |> Array.map parse
 
         if
             Array.exists
