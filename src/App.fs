@@ -9,8 +9,10 @@ open Browser.Dom
 open Browser.Types
 open Fable.Core
 open Fable.Core.JsInterop
-open Command
 open Timer'
+open System
+open System.Text.RegularExpressions
+open Fermata.ParserCombinators
 
 module App =
     let keyboardshortcut (e: KeyboardEvent) =
@@ -67,8 +69,31 @@ module App =
                 fun _ ->
                     commandInput.blur ()
 
-                    commandInput.value
-                    |> Command.ofString
+                    let tmp: Result<(Parsing.CommandAndOptions * Parsers.State), (string * Parsers.State)> array =
+                        commandInput.value
+                        |> fun x -> Regex.Split(x, "(?=down \d|up \d)")
+                        |> Array.map (fun x -> x.Trim())
+                        |> Array.filter (String.IsNullOrWhiteSpace >> not)
+                        |> Array.map (fun x -> Parsers.State(x, 0))
+                        |> Array.map Parsing.command
+
+                    if
+                        Array.exists
+                            (fun x ->
+                                match x with
+                                | Ok _ -> false
+                                | Error _ -> true)
+                            tmp
+                    then
+                        printfn "Input was invalid."
+
+                    tmp
+                    |> Array.map (fun x ->
+                        match x with
+                        | Ok(v, _) -> Command2.build' v
+                        | Error _ -> Command2.Down(Command2.defaultDown))
+                    |> Array.toList
+                    |> Command2.withDelay
                     |> List.map string
                     |> List.iter (printfn "%s")
 
