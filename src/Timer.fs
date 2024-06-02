@@ -57,11 +57,7 @@ module Timer' =
           RunningStatus = RunningStatus.NotStarted }
 
     let timeSpanToDisplay (timeSpan: TimeSpan) =
-        let h = timeSpan.Hours |> string |> String.padLeft 2 '0'
-        let m = timeSpan.Minutes |> string |> String.padLeft 2 '0'
-        let s = timeSpan.Seconds |> string |> String.padLeft 2 '0'
-        let ms = timeSpan.Milliseconds |> string |> String.padLeft 3 '0'
-        $"""%s{h}:%s{m}:%s{s}<span class="decimals">.%s{ms}</span>"""
+        $"""%02d{timeSpan.Hours}:%02d{timeSpan.Minutes}:%02d{timeSpan.Seconds}<span class="decimals">.%03d{timeSpan.Milliseconds}</span>"""
 
     let currentCommand (commands: Command2 list) (startTime: DateTime) (acc: TimeSpan) (t: DateTime) : Command2 =
         let passed = t - startTime + acc
