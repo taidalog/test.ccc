@@ -150,6 +150,10 @@ output {
     text-align: center;
 }
 
+output.validation-area {
+    text-align: left;
+}
+
 div.timer-area {
     font-family: 'Noto Sans Mono', monospace;
     font-size: calc(calc(100vw - 10%) / 7);

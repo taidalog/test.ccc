@@ -71,6 +71,31 @@ module Timer' =
         | Command2.Down v -> v.Duration - (passed - v.Delay)
         | Command2.Up v -> passed - v.Delay
 
+    let validate
+        (input: string)
+        : Result<Result<(Parsing.CommandAndOptions * Parsers.State), (string * Parsers.State)> array, Result<(Parsing.CommandAndOptions *
+          Parsers.State), (string * Parsers.State)> array>
+        =
+        let tmp: Result<(Parsing.CommandAndOptions * Parsers.State), (string * Parsers.State)> array =
+            input
+            |> fun x -> Regex.Split(x, "(?=down \d|up \d)")
+            |> Array.map (fun x -> x.Trim())
+            |> Array.filter (String.IsNullOrWhiteSpace >> not)
+            |> Array.map (fun x -> Parsers.State(x, 0))
+            |> Array.map Parsing.command
+
+        if
+            Array.exists
+                (fun x ->
+                    match x with
+                    | Ok _ -> false
+                    | Error _ -> true)
+                tmp
+        then
+            Error tmp
+        else
+            Ok tmp
+
     let start () =
         match state.RunningStatus with
         | RunningStatus.NotStarted
@@ -78,113 +103,118 @@ module Timer' =
             (document.getElementById "timerArea").classList.remove "finished"
             (document.getElementById "messageArea").classList.remove "finished"
 
-            let tmp: Result<(Parsing.CommandAndOptions * Parsers.State), (string * Parsers.State)> array =
-                (document.getElementById "commandInput" :?> HTMLInputElement).value
-                |> fun x -> Regex.Split(x, "(?=down \d|up \d)")
-                |> Array.map (fun x -> x.Trim())
-                |> Array.filter (String.IsNullOrWhiteSpace >> not)
-                |> Array.map (fun x -> Parsers.State(x, 0))
-                |> Array.map Parsing.command
-
-            if
-                Array.exists
-                    (fun x ->
+            match (document.getElementById "commandInput" :?> HTMLInputElement).value |> validate with
+            | Error xs ->
+                let msg =
+                    xs
+                    |> Array.indexed
+                    |> Array.filter (fun (_, x) ->
                         match x with
-                        | Ok _ -> false
-                        | Error _ -> true)
-                    tmp
-            then
-                printfn "Input was invalid."
+                        | Error _ -> true
+                        | Ok _ -> false)
+                    |> Array.map (fun (i, x) ->
+                        match x with
+                        | Error(e, Parsers.State(s, p)) -> $"%d{i + 1} つ目: %s{s}"
+                        //| Error(e, Parsers.State(s, p)) -> $"%d{i + 1}: %s{s}, %s{e} at %d{p + 1}"
+                        | Ok _ -> "")
+                    |> String.concat "<br>"
+                    |> (+) "以下のコマンドに誤りがあります。<br>"
 
-            let commands: Command2 list =
-                tmp
-                |> Array.map (fun x ->
-                    match x with
-                    | Ok(v, _) -> Command2.build' v
-                    | Error _ -> Command2.Down(Command2.defaultDown))
-                |> Array.toList
-                |> Command2.withDelay
+                printfn "%s" msg
+                (document.getElementById "validationArea").innerHTML <- msg
+            | Ok xs ->
+                (document.getElementById "validationArea").innerHTML <- ""
 
-            state <-
-                { initState with
-                    Stop =
-                        { initState.Stop with
-                            StartTime = DateTime.Now
-                            Acc = TimeSpan.Zero }
-                    Commands = commands
-                    WakeLock =
-                        if WakeLockAPI.isSupported () then
-                            printfn $"locking at %s{DateTime.Now.ToString()}"
+                let commands: Command2 list =
+                    xs
+                    |> Array.map (fun x ->
+                        match x with
+                        | Ok(v, _) -> Command2.build' v
+                        | Error _ -> Command2.Down(Command2.defaultDown) //never comes here.
+                    )
+                    |> Array.toList
+                    |> Command2.withDelay
 
-                            try
-                                WakeLockAPI.lock () |> Some
-                            with _ ->
+                state <-
+                    { initState with
+                        Stop =
+                            { initState.Stop with
+                                StartTime = DateTime.Now
+                                Acc = TimeSpan.Zero }
+                        Commands = commands
+                        WakeLock =
+                            if WakeLockAPI.isSupported () then
+                                printfn $"locking at %s{DateTime.Now.ToString()}"
+
+                                try
+                                    WakeLockAPI.lock () |> Some
+                                with _ ->
+                                    None
+                            else
+                                printfn "failed to lock..."
                                 None
-                        else
-                            printfn "failed to lock..."
-                            None
-                    RunningStatus = RunningStatus.Running }
+                        RunningStatus = RunningStatus.Running }
 
-            let outputArea = document.getElementById "outputArea"
+                let outputArea = document.getElementById "outputArea"
 
-            match state.WakeLock with
-            | Some x ->
-                if not x?released then
-                    printfn $"locked at %s{DateTime.Now.ToString()}"
-                    outputArea.innerText <- "画面起動ロック API により、タイマー動作中は画面がスリープしません。"
-            | None ->
-                printfn "failed to lock ...."
-                outputArea.innerText <- ""
+                match state.WakeLock with
+                | Some x ->
+                    if not x?released then
+                        printfn $"locked at %s{DateTime.Now.ToString()}"
+                        outputArea.innerText <- "画面起動ロック API により、タイマー動作中は画面がスリープしません。"
+                | None ->
+                    printfn "failed to lock ...."
+                    outputArea.innerText <- ""
 
-            let f' = f state.Commands state.Stop.StartTime
+                let f' = f state.Commands state.Stop.StartTime
 
-            let totalDuration =
-                state.Commands |> List.map Command2.duration |> List.fold (+) TimeSpan.Zero
+                let totalDuration =
+                    state.Commands |> List.map Command2.duration |> List.fold (+) TimeSpan.Zero
 
-            let intervalId =
-                setInterval
-                    (fun _ ->
-                        let elapsedTime = f' state.Stop.Acc DateTime.Now
-                        (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay elapsedTime
+                let intervalId =
+                    setInterval
+                        (fun _ ->
+                            let elapsedTime = f' state.Stop.Acc DateTime.Now
+                            (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay elapsedTime
 
-                        currentCommand state.Commands state.Stop.StartTime state.Stop.Acc DateTime.Now
-                        |> function
-                            | Command2.Down v -> (v.Color, v.Background, v.Message)
-                            | Command2.Up v -> (v.Color, v.Background, v.Message)
-                        |> fun (color, bgcolor, message) ->
-                            document.body.setAttribute (
-                                "style",
-                                (sprintf "color: %s; background-color: %s;" color bgcolor)
-                            )
+                            currentCommand state.Commands state.Stop.StartTime state.Stop.Acc DateTime.Now
+                            |> function
+                                | Command2.Down v -> (v.Color, v.Background, v.Message)
+                                | Command2.Up v -> (v.Color, v.Background, v.Message)
+                            |> fun (color, bgcolor, message) ->
+                                document.body.setAttribute (
+                                    "style",
+                                    (sprintf "color: %s; background-color: %s;" color bgcolor)
+                                )
 
-                            (document.getElementById "messageArea").innerText <- message
+                                (document.getElementById "messageArea").innerText <- message
 
-                        if (DateTime.Now - state.Stop.StartTime + state.Stop.Acc) > totalDuration then
-                            match state.Commands |> List.last with
-                            | Command2.Down _ -> TimeSpan.Zero
-                            | Command2.Up v -> v.Duration
-                            |> fun x -> (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay x
+                            if (DateTime.Now - state.Stop.StartTime + state.Stop.Acc) > totalDuration then
+                                match state.Commands |> List.last with
+                                | Command2.Down _ -> TimeSpan.Zero
+                                | Command2.Up v -> v.Duration
+                                |> fun x -> (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay x
 
-                            (document.getElementById "timerArea").classList.add "finished"
-                            (document.getElementById "messageArea").classList.add "finished"
+                                (document.getElementById "timerArea").classList.add "finished"
+                                (document.getElementById "messageArea").classList.add "finished"
 
-                            match state.WakeLock with
-                            | Some x ->
-                                printfn $"releasing at %s{DateTime.Now.ToString()}"
-                                WakeLockAPI.release x
-                            | None -> printfn "doing nothing..."
+                                match state.WakeLock with
+                                | Some x ->
+                                    printfn $"releasing at %s{DateTime.Now.ToString()}"
+                                    WakeLockAPI.release x
+                                | None -> printfn "doing nothing..."
 
-                            state <-
-                                { state with
-                                    WakeLock = None
-                                    RunningStatus = RunningStatus.Finished }
+                                state <-
+                                    { state with
+                                        WakeLock = None
+                                        RunningStatus = RunningStatus.Finished }
 
-                            (document.getElementById "outputArea").innerText <- ""
+                                (document.getElementById "outputArea").innerText <- ""
 
-                            clearInterval state.IntervalId)
-                    10
+                                clearInterval state.IntervalId)
+                        10
 
-            state <- { state with IntervalId = intervalId }
+                state <- { state with IntervalId = intervalId }
         | RunningStatus.Stopping ->
             state <-
                 { state with
