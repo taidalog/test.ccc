@@ -108,10 +108,10 @@ module Parsing =
 
     let downCommand: Parser<CommandAndOptions> =
         let f ((_, t), l) = CommandAndOptions.Down(t, l)
-        map' f (string' "down" <+&> spaces <&> time <&> options)
+        map' f (string' "down" <+&> spaces <&> time <&> options <+&> (many spaces <&> end'))
 
     let upCommand: Parser<CommandAndOptions> =
         let f ((_, t), l) = CommandAndOptions.Up(t, l)
-        map' f (string' "up" <+&> spaces <&> time <&> options)
+        map' f (string' "up" <+&> spaces <&> time <&> options <+&> (many spaces <&> end'))
 
     let command: Parser<CommandAndOptions> = downCommand <|> upCommand
