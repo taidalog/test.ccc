@@ -3,6 +3,7 @@
     <TargetFramework>netstandard2.0</TargetFramework>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Parsing.fs" />
     <Compile Include="Command.fs" />
     <Compile Include="WakeLockAPI.fs" />
     <Compile Include="Timer.fs" />
