@@ -251,7 +251,7 @@ module Command2 =
     let withDelay (xs: Command2 list) =
         let delays =
             xs
-            |> List.map Duration
+            |> List.map duration
             |> List.scan (+) TimeSpan.Zero
             |> (List.rev >> List.tail >> List.rev)
 
