@@ -189,27 +189,27 @@ module Command2 =
         | Down of DownCommand
         | Up of UpCommand
 
-    let Duration (x: Command2) : TimeSpan =
+    let duration (x: Command2) : TimeSpan =
         match x with
         | Command2.Down v -> v.Duration
         | Command2.Up v -> v.Duration
 
-    let Delay (x: Command2) : TimeSpan option =
+    let delay (x: Command2) : TimeSpan option =
         match x with
         | Command2.Down v -> Some(v.Delay)
         | Command2.Up v -> Some(v.Delay)
 
-    let Color (x: Command2) : string option =
+    let color (x: Command2) : string option =
         match x with
         | Command2.Down v -> Some(v.Color)
         | Command2.Up v -> Some(v.Color)
 
-    let Background (x: Command2) : string option =
+    let background (x: Command2) : string option =
         match x with
         | Command2.Down v -> Some(v.Background)
         | Command2.Up v -> Some(v.Background)
 
-    let Message (x: Command2) : string option =
+    let message (x: Command2) : string option =
         match x with
         | Command2.Down v -> Some(v.Message)
         | Command2.Up v -> Some(v.Message)
