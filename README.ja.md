@@ -94,6 +94,12 @@ down 5:00 --message Presentation. up 120 -bg #aaccff -m Questions and answers. -
 
 - Firefox を使用している場合、タイマーの動作中に画面が暗くなるのを防止できない。これは[画面起動ロック API](https://developer.mozilla.org/en-US/docs/Web/API/Screen_Wake_Lock_API)が Firefox でサポートされていないため。
 
+## 破壊的変更
+
+### 0.6.0
+
+- 入力したコマンドに誤りがある場合、タイマーが起動しないようになった。
+
 ## リリースノート
 
 [Releases on GitHub](https://github.com/taidalog/ccc/releases)
