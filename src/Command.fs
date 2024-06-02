@@ -169,3 +169,94 @@ module Command =
         match command with
         | Command.CountDown(_, delay, _, _, _) -> delay
         | Command.CountUp(_, delay, _, _, _) -> delay
+
+module Command2 =
+    type DownCommand =
+        { Duration: TimeSpan
+          Delay: TimeSpan
+          Color: string
+          Background: string
+          Message: string }
+
+    type UpCommand =
+        { Duration: TimeSpan
+          Delay: TimeSpan
+          Color: string
+          Background: string
+          Message: string }
+
+    type Command2 =
+        | Down of DownCommand
+        | Up of UpCommand
+
+    let Duration (x: Command2) : TimeSpan =
+        match x with
+        | Command2.Down v -> v.Duration
+        | Command2.Up v -> v.Duration
+
+    let Delay (x: Command2) : TimeSpan option =
+        match x with
+        | Command2.Down v -> Some(v.Delay)
+        | Command2.Up v -> Some(v.Delay)
+
+    let Color (x: Command2) : string option =
+        match x with
+        | Command2.Down v -> Some(v.Color)
+        | Command2.Up v -> Some(v.Color)
+
+    let Background (x: Command2) : string option =
+        match x with
+        | Command2.Down v -> Some(v.Background)
+        | Command2.Up v -> Some(v.Background)
+
+    let Message (x: Command2) : string option =
+        match x with
+        | Command2.Down v -> Some(v.Message)
+        | Command2.Up v -> Some(v.Message)
+
+    let defaultDown: DownCommand =
+        { Duration = TimeSpan.Zero
+          Delay = TimeSpan.Zero
+          Color = ""
+          Background = ""
+          Message = "" }
+
+    let defaultUp: UpCommand =
+        { Duration = TimeSpan.Zero
+          Delay = TimeSpan.Zero
+          Color = ""
+          Background = ""
+          Message = "" }
+
+    let update (command: Command2) (options: Parsing.Options) : Command2 =
+        match command with
+        | Command2.Down d ->
+            match options with
+            | Parsing.Options.Color v -> { d with Color = v }
+            | Parsing.Options.Background v -> { d with Background = v }
+            | Parsing.Options.Message v -> { d with Message = v }
+            |> Command2.Down
+        | Command2.Up u ->
+            match options with
+            | Parsing.Options.Color v -> { u with Color = v }
+            | Parsing.Options.Background v -> { u with Background = v }
+            | Parsing.Options.Message v -> { u with Message = v }
+            |> Command2.Up
+
+    let build' (x: Parsing.CommandAndOptions) : Command2 =
+        match x with
+        | Parsing.CommandAndOptions.Down(t, vs) -> List.fold update (Command2.Down { defaultDown with Duration = t }) vs
+        | Parsing.CommandAndOptions.Up(t, vs) -> List.fold update (Command2.Up { defaultUp with Duration = t }) vs
+
+    let withDelay (xs: Command2 list) =
+        let delays =
+            xs
+            |> List.map Duration
+            |> List.scan (+) TimeSpan.Zero
+            |> (List.rev >> List.tail >> List.rev)
+
+        (xs, delays)
+        ||> List.map2 (fun x y ->
+            match x with
+            | Command2.Down v -> (Command2.Down { v with Delay = y })
+            | Command2.Up v -> (Command2.Up { v with Delay = y }))
