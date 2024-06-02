@@ -13,7 +13,6 @@ open Fable.Core
 open Fable.Core.JsInterop
 open Command2
 open WakeLockAPI
-open Fermata
 open Fermata.ParserCombinators
 
 module Timer' =
@@ -82,21 +81,6 @@ module Timer' =
 
     let validate input =
         let tmp = input |> split |> Array.map parse
-
-        if
-            Array.exists
-                (fun x ->
-                    match x with
-                    | Ok _ -> false
-                    | Error _ -> true)
-                tmp
-        then
-            Error tmp
-        else
-            Ok tmp
-
-    let validate' input =
-        let tmp = input |> split |> Array.map parse |> Array.fore
 
         if
             Array.exists
