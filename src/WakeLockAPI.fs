@@ -1,4 +1,4 @@
-// ccc Version 0.5.0
+// ccc Version 0.6.0
 // https://github.com/taidalog/ccc
 // Copyright (c) 2023-2024 taidalog
 // This software is licensed under the MIT License.
