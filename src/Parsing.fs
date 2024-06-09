@@ -1,4 +1,4 @@
-// ccc Version 0.6.1
+// ccc Version 0.7.0
 // https://github.com/taidalog/ccc
 // Copyright (c) 2023-2024 taidalog
 // This software is licensed under the MIT License.
@@ -71,33 +71,51 @@ module Parsing =
             ((string' "--background" <|> string' "-bg") <&> spaces <&+> hexCode
              <+&> (pos spaces <|> end'))
 
+    let messageOption2: Parser<Options> =
+        let name = string' "--message" <|> string' "-m"
+
+        let body =
+            let names = string' "--color" <|> string' "-c"
+
+            many (any <+&> (neg (spaces <&> names) <|> neg end'))
+            <&> (any <+&> (pos (spaces <&> names) <|> pos end'))
+
+        let f (cs, c) =
+            c :: List.rev cs
+            |> List.rev
+            |> List.map string
+            |> String.concat ""
+            |> fun x -> x.Trim()
+            |> Options.Message
+
+        map' f (name <&> spaces <&+> body)
+
     let messageOption: Parser<Options> =
+        let pos' (parser) =
+            fun (State(x, p)) ->
+                match parser (State(x, p)) with
+                | Ok _ -> Ok((), State(x, p))
+                | Error _ -> Error("Parsing failed.", State(x, p))
+
         let name = string' "--message" <|> string' "-m"
 
         let body' =
-            let withoutOptions =
-                (neg (string' "--color")
-                 <&> neg (string' "-c")
-                 <&> neg (string' "--background")
-                 <&> neg (string' "-bg"))
+            let names =
+                string' "--color" <|> string' "-c" <|> string' "--background" <|> string' "-bg"
 
-            let withOptions =
-                (pos (string' "--color")
-                 <|> pos (string' "-c")
-                 <|> pos (string' "--background")
-                 <|> pos (string' "-bg"))
+            let withoutTerminator = neg (spaces <&> names) <&> neg end'
+            let withTerminator = pos (spaces <&> names) <|> pos' end'
+            (many (any <+&> withoutTerminator)) <&> (any <+&> withTerminator)
 
-            let withOptionsOrEnd = withOptions <|> end'
+        let f (cs, c) =
+            c :: List.rev cs
+            |> List.rev
+            |> List.map string
+            |> String.concat ""
+            |> fun x -> x.Trim()
+            |> Options.Message
 
-            (many (any <+&> withoutOptions)) <&> (any <+&> withOptionsOrEnd)
-
-        map'
-            (fun (cs, c) ->
-                cs @ [ c ]
-                |> List.map string
-                |> String.concat ""
-                |> fun x -> x.Trim() |> Options.Message)
-            (name <&> spaces <&+> body')
+        map' f (name <&> spaces <&+> body')
 
     let options: Parser<Options list> =
         many (
