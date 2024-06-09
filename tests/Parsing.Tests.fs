@@ -187,7 +187,7 @@ let ``messageOption 1`` () =
 [<Fact>]
 let ``messageOption 2`` () =
     let expected =
-        Ok(Options.Message "hey hey", State("--message hey hey --color #65a2ac", 18))
+        Ok(Options.Message "hey hey", State("--message hey hey --color #65a2ac", 17))
 
     let actual = messageOption (State("--message hey hey --color #65a2ac", 0))
     Assert.Equal(expected, actual)
@@ -220,6 +220,24 @@ let ``downCommand 2`` () =
     Assert.Equal(expected, actual)
 
 [<Fact>]
+let ``downCommand 3`` () =
+    let expected =
+        Ok(
+            CommandAndOptions.Down(
+                TimeSpan(0, 5, 0),
+                [ Options.Message "hey hey"
+                  Options.Color "#ffffff"
+                  Options.Background "#65a2ac" ]
+            ),
+            State("down 5:00 --message hey hey --color #ffffff --background #65a2ac", 64)
+        )
+
+    let actual =
+        downCommand (State("down 5:00 --message hey hey --color #ffffff --background #65a2ac", 0))
+
+    Assert.Equal(expected, actual)
+
+[<Fact>]
 let ``upCommand 1`` () =
     let expected =
         Ok(CommandAndOptions.Up(TimeSpan(0, 5, 0), [ Options.Message "hey" ]), State("up 5:00 -m hey", 14))
@@ -243,6 +261,24 @@ let ``upCommand 2`` () =
 
     let actual =
         upCommand (State("up 5:00 --color #ffffff --background #65a2ac --message hey hey", 0))
+
+    Assert.Equal(expected, actual)
+
+[<Fact>]
+let ``upCommand 3`` () =
+    let expected =
+        Ok(
+            CommandAndOptions.Up(
+                TimeSpan(0, 5, 0),
+                [ Options.Message "hey hey"
+                  Options.Color "#ffffff"
+                  Options.Background "#65a2ac" ]
+            ),
+            State("up 5:00 --message hey hey --color #ffffff --background #65a2ac", 62)
+        )
+
+    let actual =
+        upCommand (State("up 5:00 --message hey hey --color #ffffff --background #65a2ac", 0))
 
     Assert.Equal(expected, actual)
 
