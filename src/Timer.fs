@@ -69,24 +69,12 @@ module Timer' =
     let timeSpanToDisplay (timeSpan: TimeSpan) =
         $"""%02d{timeSpan.Hours}:%02d{timeSpan.Minutes}:%02d{timeSpan.Seconds}<span class="decimals">.%03d{timeSpan.Milliseconds}</span>"""
 
-    let currentCommand (commands: Command2 list) (startTime: DateTime) (acc: TimeSpan) (t: DateTime) : Command2 =
-        let passed = t - startTime + acc
-        commands |> List.findBack (fun x -> Command2.delay x <= passed)
-
-    let f (commands: Command2 list) (startTime: DateTime) (acc: TimeSpan) (t: DateTime) : TimeSpan =
-        let passed = t - startTime + acc
-        let c = currentCommand commands startTime acc t
-
-        match c with
-        | Command2.Down v -> v.Duration - (passed - v.Delay)
-        | Command2.Up v -> passed - v.Delay
-
-    let elapsedTime command startTime acc t =
+    let elapsedTime (command: Command2) (startTime: DateTime) (acc: TimeSpan) (t: DateTime) : TimeSpan =
         let passed = t - startTime + acc
 
         match command with
         | Command2.Down v -> v.Duration - passed
-        | Command2.Up v -> passed
+        | Command2.Up _ -> passed
 
     let split (input: string) : string array =
         input
@@ -163,7 +151,6 @@ module Timer' =
                         | Error _ -> Command2.Down(Command2.defaultDown) //never comes here.
                     )
                     |> Array.toList
-                    |> Command2.withDelay
 
                 state <-
                     { initState with
@@ -202,8 +189,6 @@ module Timer' =
                     printfn "failed to lock ...."
                     outputArea.innerText <- ""
 
-                let f' = f state.Commands.Remaining state.Stop.StartTime
-
                 let intervalId =
                     setInterval
                         (fun _ ->
@@ -238,27 +223,24 @@ module Timer' =
                                             Commands = { state.Commands with Remaining = t }
                                             Current = { StartTime = now; Acc = TimeSpan.Zero } }
 
-                                    state.Commands.Remaining |> List.iter (printfn "%A")
+                                    state.Commands.Remaining |> (printfn "%A")
 
-                                    if Command2.message h = "" then
-                                        // Pausing.
+                                    // Displaying time.
+                                    match h with
+                                    | Command2.Down _ -> TimeSpan.Zero
+                                    | Command2.Up v -> v.Duration
+                                    |> timeSpanToDisplay
+                                    |> fun x -> (document.getElementById "timerArea").innerHTML <- x
+
+                                    // Pausing.
+                                    if Command2.shouldPause h then
                                         stop ()
-
-                                        // Displaying time.
-                                        match h with
-                                        | Command2.Down _ -> TimeSpan.Zero
-                                        | Command2.Up v -> v.Duration
-                                        |> timeSpanToDisplay
-                                        |> fun x -> (document.getElementById "timerArea").innerHTML <- x
                                 else
                                     // The current command has NOT come to its end.
-                                    let elapsedTime = f' state.Stop.Acc now
-                                    (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay elapsedTime
+                                    let elapsedTime' = elapsedTime h state.Current.StartTime state.Current.Acc now
+                                    (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay elapsedTime'
 
-                                    let current =
-                                        currentCommand state.Commands.Remaining state.Stop.StartTime state.Stop.Acc now
-
-                                    match current with
+                                    match h with
                                     | Command2.Down v -> (v.Color, v.Background, v.Message)
                                     | Command2.Up v -> (v.Color, v.Background, v.Message)
                                     |> fun (color, bgcolor, message) ->
@@ -277,8 +259,6 @@ module Timer' =
                     Stop.StartTime = DateTime.Now
                     Current.StartTime = DateTime.Now
                     RunningStatus = RunningStatus.Running }
-
-            let f' = f state.Commands.Remaining state.Stop.StartTime
 
             let intervalId =
                 setInterval
@@ -314,27 +294,24 @@ module Timer' =
                                         Commands = { state.Commands with Remaining = t }
                                         Current = { StartTime = now; Acc = TimeSpan.Zero } }
 
-                                state.Commands.Remaining |> List.iter (printfn "%A")
+                                state.Commands.Remaining |> (printfn "%A")
 
-                                if Command2.message h = "" then
-                                    // Pausing.
+                                // Displaying time.
+                                match h with
+                                | Command2.Down _ -> TimeSpan.Zero
+                                | Command2.Up v -> v.Duration
+                                |> timeSpanToDisplay
+                                |> fun x -> (document.getElementById "timerArea").innerHTML <- x
+
+                                // Pausing.
+                                if Command2.shouldPause h then
                                     stop ()
-
-                                    // Displaying time.
-                                    match h with
-                                    | Command2.Down _ -> TimeSpan.Zero
-                                    | Command2.Up v -> v.Duration
-                                    |> timeSpanToDisplay
-                                    |> fun x -> (document.getElementById "timerArea").innerHTML <- x
                             else
                                 // The current command has NOT come to its end.
-                                let elapsedTime = f' state.Stop.Acc now
-                                (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay elapsedTime
+                                let elapsedTime' = elapsedTime h state.Current.StartTime state.Current.Acc now
+                                (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay elapsedTime'
 
-                                let current =
-                                    currentCommand state.Commands.Remaining state.Stop.StartTime state.Stop.Acc now
-
-                                match current with
+                                match h with
                                 | Command2.Down v -> (v.Color, v.Background, v.Message)
                                 | Command2.Up v -> (v.Color, v.Background, v.Message)
                                 |> fun (color, bgcolor, message) ->

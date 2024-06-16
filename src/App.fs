@@ -163,7 +163,6 @@ module App =
                         | Ok(v, _) -> Command2.build' v
                         | Error _ -> Command2.Down(Command2.defaultDown))
                     |> Array.toList
-                    |> Command2.withDelay
                     |> List.map string
                     |> List.iter (printfn "%s")
 

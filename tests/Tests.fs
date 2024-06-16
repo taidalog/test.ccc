@@ -14,7 +14,7 @@ open Ccc.Command2
 let ``Command2.update 1`` () =
     let seed: DownCommand =
         { Duration = TimeSpan(0, 5, 0)
-          Delay = TimeSpan.Zero
+          //   Delay = TimeSpan.Zero
           Color = ""
           Background = ""
           Message = ""
@@ -40,7 +40,7 @@ let ``Command2.build' 1`` () =
 
     let expected: Command2 =
         { DownCommand.Duration = TimeSpan(0, 5, 0)
-          Delay = TimeSpan.Zero
+          //   Delay = TimeSpan.Zero
           Color = "#ffffff"
           Background = "#65a2ac"
           Message = "hey hey"
@@ -50,39 +50,3 @@ let ``Command2.build' 1`` () =
     let actual: Command2 = Command2.build' seed
 
     Assert.Equal(expected, actual)
-
-[<Fact>]
-let ``Command2.withDelay 1`` () =
-    let seeds: Parsing.CommandAndOptions list =
-        [ Parsing.CommandAndOptions.Down(
-              TimeSpan(0, 5, 0),
-              [ Parsing.Options.Color "#ffffff"
-                Parsing.Options.Background "#65a2ac"
-                Parsing.Options.Message "hey hey" ]
-          )
-          Parsing.CommandAndOptions.Up(
-              TimeSpan(0, 2, 0),
-              [ Parsing.Options.Color "#333333"
-                Parsing.Options.Background "#ffffff"
-                Parsing.Options.Message "hey" ]
-          ) ]
-
-    let expected: Command2 list =
-        [ Command2.Down
-              { Duration = TimeSpan(0, 5, 0)
-                Delay = TimeSpan.Zero
-                Color = "#ffffff"
-                Background = "#65a2ac"
-                Message = "hey hey"
-                ShouldPause = false }
-          Command2.Up
-              { Duration = TimeSpan(0, 2, 0)
-                Delay = TimeSpan(0, 5, 0)
-                Color = "#333333"
-                Background = "#ffffff"
-                Message = "hey"
-                ShouldPause = false } ]
-
-    let actual: Command2 list = seeds |> List.map Command2.build' |> withDelay
-
-    Assert.Equal<Command2 list>(expected, actual)
