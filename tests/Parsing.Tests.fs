@@ -193,6 +193,13 @@ let ``messageOption 2`` () =
     Assert.Equal(expected, actual)
 
 [<Fact>]
+let ``messageOption 3`` () =
+    let expected = Ok(Options.Message "hey hey", State("--message hey hey --pause", 17))
+
+    let actual = messageOption (State("--message hey hey --pause", 0))
+    Assert.Equal(expected, actual)
+
+[<Fact>]
 let ``pauseOption 1`` () =
     let expected = Ok(Options.ShouldPause true, State("--pause --color #65a2ac", 7))
     let actual = pauseOption (State("--pause --color #65a2ac", 0))

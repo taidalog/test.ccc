@@ -72,24 +72,24 @@ module Parsing =
             ((string' "--background" <|> string' "-bg") <&> spaces <&+> hexCode
              <+&> (pos spaces <|> end'))
 
-    let messageOption2: Parser<Options> =
-        let name = string' "--message" <|> string' "-m"
+    // let messageOption2: Parser<Options> =
+    //     let name = string' "--message" <|> string' "-m"
 
-        let body =
-            let names = string' "--color" <|> string' "-c"
+    //     let body =
+    //         let names = string' "--color" <|> string' "-c"
 
-            many (any <+&> (neg (spaces <&> names) <|> neg end'))
-            <&> (any <+&> (pos (spaces <&> names) <|> pos end'))
+    //         many (any <+&> (neg (spaces <&> names) <|> neg end'))
+    //         <&> (any <+&> (pos (spaces <&> names) <|> pos end'))
 
-        let f (cs, c) =
-            c :: List.rev cs
-            |> List.rev
-            |> List.map string
-            |> String.concat ""
-            |> _.Trim()
-            |> Options.Message
+    //     let f (cs, c) =
+    //         c :: List.rev cs
+    //         |> List.rev
+    //         |> List.map string
+    //         |> String.concat ""
+    //         |> _.Trim()
+    //         |> Options.Message
 
-        map' f (name <&> spaces <&+> body)
+    //     map' f (name <&> spaces <&+> body)
 
     let messageOption: Parser<Options> =
         let pos' (parser) =
@@ -102,7 +102,12 @@ module Parsing =
 
         let body' =
             let names =
-                string' "--color" <|> string' "-c" <|> string' "--background" <|> string' "-bg"
+                string' "--color"
+                <|> string' "-c"
+                <|> string' "--background"
+                <|> string' "-bg"
+                <|> string' "--pause"
+                <|> string' "-p"
 
             let withoutTerminator = neg (spaces <&> names) <&> neg end'
             let withTerminator = pos (spaces <&> names) <|> pos' end'
