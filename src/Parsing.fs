@@ -1,4 +1,4 @@
-// ccc Version 0.7.0
+// ccc Version 0.8.0
 // https://github.com/taidalog/ccc
 // Copyright (c) 2023-2024 taidalog
 // This software is licensed under the MIT License.
@@ -13,6 +13,7 @@ module Parsing =
         | Color of string
         | Background of string
         | Message of string
+        | ShouldPause of bool
 
     type CommandAndOptions =
         | Up of TimeSpan * Options list
@@ -85,7 +86,7 @@ module Parsing =
             |> List.rev
             |> List.map string
             |> String.concat ""
-            |> fun x -> x.Trim()
+            |> _.Trim()
             |> Options.Message
 
         map' f (name <&> spaces <&+> body)
@@ -112,16 +113,21 @@ module Parsing =
             |> List.rev
             |> List.map string
             |> String.concat ""
-            |> fun x -> x.Trim()
+            |> _.Trim()
             |> Options.Message
 
         map' f (name <&> spaces <&+> body')
+
+    let pauseOption: Parser<Options> =
+        let f _ = true
+        map' (f >> Options.ShouldPause) ((string' "--pause" <|> string' "-p") <+&> (pos spaces <|> end'))
 
     let options: Parser<Options list> =
         many (
             (spaces <&+> colorOption)
             <|> (spaces <&+> backgroundOption)
             <|> (spaces <&+> messageOption)
+            <|> (spaces <&+> pauseOption)
         )
 
     let downCommand: Parser<CommandAndOptions> =

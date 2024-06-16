@@ -1,4 +1,4 @@
-// ccc Version 0.7.0
+// ccc Version 0.8.0
 // https://github.com/taidalog/ccc
 // Copyright (c) 2023-2024 taidalog
 // This software is licensed under the MIT License.
@@ -142,7 +142,7 @@ module App =
                     let tmp: Result<(Parsing.CommandAndOptions * Parsers.State), (string * Parsers.State)> array =
                         commandInput.value
                         |> fun x -> Regex.Split(x, "(?=down \d|up \d)")
-                        |> Array.map (fun x -> x.Trim())
+                        |> Array.map _.Trim()
                         |> Array.filter (String.IsNullOrWhiteSpace >> not)
                         |> Array.map (fun x -> Parsers.State(x, 0))
                         |> Array.map Parsing.command
@@ -163,7 +163,6 @@ module App =
                         | Ok(v, _) -> Command2.build' v
                         | Error _ -> Command2.Down(Command2.defaultDown))
                     |> Array.toList
-                    |> Command2.withDelay
                     |> List.map string
                     |> List.iter (printfn "%s")
 
