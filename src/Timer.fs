@@ -24,11 +24,15 @@ module Timer' =
 
     type TimeAcc = { StartTime: DateTime; Acc: TimeSpan }
 
+    type Commands =
+        { Input: Command2 list
+          Remaining: Command2 list }
+
     type State =
         { Stop: TimeAcc
           Current: TimeAcc
           IntervalId: int
-          Commands: Command2 list
+          Commands: Commands
           WakeLock: JS.Promise<obj> option
           RunningStatus: RunningStatus }
 
@@ -46,7 +50,7 @@ module Timer' =
             { StartTime = DateTime.MinValue
               Acc = TimeSpan.Zero }
           IntervalId = -1
-          Commands = []
+          Commands = { Input = []; Remaining = [] }
           WakeLock = None
           RunningStatus = RunningStatus.NotStarted }
 
@@ -58,7 +62,7 @@ module Timer' =
             { StartTime = DateTime.MinValue
               Acc = TimeSpan.Zero }
           IntervalId = -1
-          Commands = []
+          Commands = { Input = []; Remaining = [] }
           WakeLock = None
           RunningStatus = RunningStatus.NotStarted }
 
@@ -76,6 +80,13 @@ module Timer' =
         match c with
         | Command2.Down v -> v.Duration - (passed - v.Delay)
         | Command2.Up v -> passed - v.Delay
+
+    let elapsedTime command startTime acc t =
+        let passed = t - startTime + acc
+
+        match command with
+        | Command2.Down v -> v.Duration - passed
+        | Command2.Up v -> passed
 
     let split (input: string) : string array =
         input
@@ -100,6 +111,20 @@ module Timer' =
             Error tmp
         else
             Ok tmp
+
+    let stop () =
+        match state.RunningStatus with
+        | RunningStatus.Running ->
+            clearInterval state.IntervalId
+
+            let now = DateTime.Now
+
+            state <-
+                { state with
+                    Stop.Acc = state.Stop.Acc + (now - state.Stop.StartTime)
+                    Current.Acc = state.Current.Acc + (now - state.Current.StartTime)
+                    RunningStatus = RunningStatus.Stopping }
+        | _ -> ()
 
     let start () =
         match state.RunningStatus with
@@ -147,10 +172,12 @@ module Timer' =
                                 StartTime = DateTime.Now
                                 Acc = TimeSpan.Zero }
                         Current =
-                            { initState.Stop with
+                            { initState.Current with
                                 StartTime = DateTime.Now
                                 Acc = TimeSpan.Zero }
-                        Commands = commands
+                        Commands =
+                            { Input = commands
+                              Remaining = commands }
                         WakeLock =
                             if WakeLockAPI.isSupported () then
                                 printfn $"locking at %s{DateTime.Now.ToString()}"
@@ -175,35 +202,13 @@ module Timer' =
                     printfn "failed to lock ...."
                     outputArea.innerText <- ""
 
-                let f' = f state.Commands state.Stop.StartTime
-
-                let totalDuration =
-                    state.Commands |> List.map Command2.duration |> List.fold (+) TimeSpan.Zero
+                let f' = f state.Commands.Remaining state.Stop.StartTime
 
                 let intervalId =
                     setInterval
                         (fun _ ->
-                            let elapsedTime = f' state.Stop.Acc DateTime.Now
-                            (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay elapsedTime
-
-                            currentCommand state.Commands state.Stop.StartTime state.Stop.Acc DateTime.Now
-                            |> function
-                                | Command2.Down v -> (v.Color, v.Background, v.Message)
-                                | Command2.Up v -> (v.Color, v.Background, v.Message)
-                            |> fun (color, bgcolor, message) ->
-                                document.body.setAttribute (
-                                    "style",
-                                    (sprintf "color: %s; background-color: %s;" color bgcolor)
-                                )
-
-                                (document.getElementById "messageArea").innerText <- message
-
-                            if (DateTime.Now - state.Stop.StartTime + state.Stop.Acc) > totalDuration then
-                                match state.Commands |> List.last with
-                                | Command2.Down _ -> TimeSpan.Zero
-                                | Command2.Up v -> v.Duration
-                                |> fun x -> (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay x
-
+                            match state.Commands.Remaining with
+                            | [] ->
                                 (document.getElementById "timerArea").classList.add "finished"
                                 (document.getElementById "messageArea").classList.add "finished"
 
@@ -220,7 +225,49 @@ module Timer' =
 
                                 (document.getElementById "outputArea").innerText <- ""
 
-                                clearInterval state.IntervalId)
+                                clearInterval state.IntervalId
+                            | h :: t ->
+                                let now = DateTime.Now
+                                let passedTime = now - state.Current.StartTime + state.Current.Acc
+
+                                // Checking if the current command has come to its end.
+                                if passedTime > Command2.duration h then
+                                    // The current command has come to its end.
+                                    state <-
+                                        { state with
+                                            Commands = { state.Commands with Remaining = t }
+                                            Current = { StartTime = now; Acc = TimeSpan.Zero } }
+
+                                    state.Commands.Remaining |> List.iter (printfn "%A")
+
+                                    if Command2.message h = "" then
+                                        // Pausing.
+                                        stop ()
+
+                                        // Displaying time.
+                                        match h with
+                                        | Command2.Down _ -> TimeSpan.Zero
+                                        | Command2.Up v -> v.Duration
+                                        |> timeSpanToDisplay
+                                        |> fun x -> (document.getElementById "timerArea").innerHTML <- x
+                                else
+                                    // The current command has NOT come to its end.
+                                    let elapsedTime = f' state.Stop.Acc now
+                                    (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay elapsedTime
+
+                                    let current =
+                                        currentCommand state.Commands.Remaining state.Stop.StartTime state.Stop.Acc now
+
+                                    match current with
+                                    | Command2.Down v -> (v.Color, v.Background, v.Message)
+                                    | Command2.Up v -> (v.Color, v.Background, v.Message)
+                                    |> fun (color, bgcolor, message) ->
+                                        document.body.setAttribute (
+                                            "style",
+                                            (sprintf "color: %s; background-color: %s;" color bgcolor)
+                                        )
+
+                                        (document.getElementById "messageArea").innerText <- message)
                         10
 
                 state <- { state with IntervalId = intervalId }
@@ -231,60 +278,75 @@ module Timer' =
                     Current.StartTime = DateTime.Now
                     RunningStatus = RunningStatus.Running }
 
-            let f' = f state.Commands state.Stop.StartTime
-
-            let totalDuration =
-                state.Commands |> List.map Command2.duration |> List.fold (+) TimeSpan.Zero
+            let f' = f state.Commands.Remaining state.Stop.StartTime
 
             let intervalId =
                 setInterval
                     (fun _ ->
-                        let elapsedTime = f' state.Stop.Acc DateTime.Now
-                        (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay elapsedTime
-
-                        currentCommand state.Commands state.Stop.StartTime state.Stop.Acc DateTime.Now
-                        |> function
-                            | Command2.Down v -> (v.Color, v.Background, v.Message)
-                            | Command2.Up v -> (v.Color, v.Background, v.Message)
-                        |> fun (color, bgcolor, message) ->
-                            document.body.setAttribute (
-                                "style",
-                                (sprintf "color: %s; background-color: %s;" color bgcolor)
-                            )
-
-                            (document.getElementById "messageArea").innerText <- message
-
-                        if (DateTime.Now - state.Stop.StartTime + state.Stop.Acc) > totalDuration then
-                            match state.Commands |> List.last with
-                            | Command2.Down _ -> TimeSpan.Zero
-                            | Command2.Up v -> v.Duration
-                            |> fun x -> (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay x
-
+                        match state.Commands.Remaining with
+                        | [] ->
                             (document.getElementById "timerArea").classList.add "finished"
                             (document.getElementById "messageArea").classList.add "finished"
 
+                            match state.WakeLock with
+                            | Some x ->
+                                printfn $"releasing at %s{DateTime.Now.ToString()}"
+                                WakeLockAPI.release x
+                            | None -> printfn "doing nothing..."
+
                             state <-
                                 { state with
+                                    WakeLock = None
                                     RunningStatus = RunningStatus.Finished }
 
-                            clearInterval state.IntervalId)
+                            (document.getElementById "outputArea").innerText <- ""
+
+                            clearInterval state.IntervalId
+                        | h :: t ->
+                            let now = DateTime.Now
+                            let passedTime = now - state.Current.StartTime + state.Current.Acc
+
+                            // Checking if the current command has come to its end.
+                            if passedTime > Command2.duration h then
+                                // The current command has come to its end.
+                                state <-
+                                    { state with
+                                        Commands = { state.Commands with Remaining = t }
+                                        Current = { StartTime = now; Acc = TimeSpan.Zero } }
+
+                                state.Commands.Remaining |> List.iter (printfn "%A")
+
+                                if Command2.message h = "" then
+                                    // Pausing.
+                                    stop ()
+
+                                    // Displaying time.
+                                    match h with
+                                    | Command2.Down _ -> TimeSpan.Zero
+                                    | Command2.Up v -> v.Duration
+                                    |> timeSpanToDisplay
+                                    |> fun x -> (document.getElementById "timerArea").innerHTML <- x
+                            else
+                                // The current command has NOT come to its end.
+                                let elapsedTime = f' state.Stop.Acc now
+                                (document.getElementById "timerArea").innerHTML <- timeSpanToDisplay elapsedTime
+
+                                let current =
+                                    currentCommand state.Commands.Remaining state.Stop.StartTime state.Stop.Acc now
+
+                                match current with
+                                | Command2.Down v -> (v.Color, v.Background, v.Message)
+                                | Command2.Up v -> (v.Color, v.Background, v.Message)
+                                |> fun (color, bgcolor, message) ->
+                                    document.body.setAttribute (
+                                        "style",
+                                        (sprintf "color: %s; background-color: %s;" color bgcolor)
+                                    )
+
+                                    (document.getElementById "messageArea").innerText <- message)
                     10
 
             state <- { state with IntervalId = intervalId }
-        | _ -> ()
-
-    let stop () =
-        match state.RunningStatus with
-        | RunningStatus.Running ->
-            clearInterval state.IntervalId
-
-            let now = DateTime.Now
-
-            state <-
-                { state with
-                    Stop.Acc = state.Stop.Acc + (now - state.Stop.StartTime)
-                    Current.Acc = state.Current.Acc + (now - state.Current.StartTime)
-                    RunningStatus = RunningStatus.Stopping }
         | _ -> ()
 
     let reset event =
