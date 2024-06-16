@@ -193,6 +193,18 @@ let ``messageOption 2`` () =
     Assert.Equal(expected, actual)
 
 [<Fact>]
+let ``pauseOption 1`` () =
+    let expected = Ok(Options.ShouldPause true, State("--pause --color #65a2ac", 7))
+    let actual = pauseOption (State("--pause --color #65a2ac", 0))
+    Assert.Equal(expected, actual)
+
+[<Fact>]
+let ``pauseOption 2`` () =
+    let expected = Ok(Options.ShouldPause true, State("-p --color #65a2ac", 2))
+    let actual = pauseOption (State("-p --color #65a2ac", 0))
+    Assert.Equal(expected, actual)
+
+[<Fact>]
 let ``downCommand 1`` () =
     let expected =
         Ok(CommandAndOptions.Down(TimeSpan(0, 5, 0), [ Options.Message "hey" ]), State("down 5:00 -m hey", 16))
@@ -238,6 +250,25 @@ let ``downCommand 3`` () =
     Assert.Equal(expected, actual)
 
 [<Fact>]
+let ``downCommand 4`` () =
+    let expected =
+        Ok(
+            CommandAndOptions.Down(
+                TimeSpan(0, 5, 0),
+                [ Options.Message "hey hey"
+                  Options.Color "#ffffff"
+                  Options.Background "#65a2ac"
+                  Options.ShouldPause true ]
+            ),
+            State("down 5:00 --message hey hey --color #ffffff --background #65a2ac --pause", 72)
+        )
+
+    let actual =
+        downCommand (State("down 5:00 --message hey hey --color #ffffff --background #65a2ac --pause", 0))
+
+    Assert.Equal(expected, actual)
+
+[<Fact>]
 let ``upCommand 1`` () =
     let expected =
         Ok(CommandAndOptions.Up(TimeSpan(0, 5, 0), [ Options.Message "hey" ]), State("up 5:00 -m hey", 14))
@@ -279,6 +310,25 @@ let ``upCommand 3`` () =
 
     let actual =
         upCommand (State("up 5:00 --message hey hey --color #ffffff --background #65a2ac", 0))
+
+    Assert.Equal(expected, actual)
+
+[<Fact>]
+let ``upCommand 4`` () =
+    let expected =
+        Ok(
+            CommandAndOptions.Up(
+                TimeSpan(0, 5, 0),
+                [ Options.Message "hey hey"
+                  Options.Color "#ffffff"
+                  Options.Background "#65a2ac"
+                  Options.ShouldPause true ]
+            ),
+            State("up 5:00 --message hey hey --color #ffffff --background #65a2ac --pause", 70)
+        )
+
+    let actual =
+        upCommand (State("up 5:00 --message hey hey --color #ffffff --background #65a2ac --pause", 0))
 
     Assert.Equal(expected, actual)
 

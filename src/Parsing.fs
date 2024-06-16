@@ -13,6 +13,7 @@ module Parsing =
         | Color of string
         | Background of string
         | Message of string
+        | ShouldPause of bool
 
     type CommandAndOptions =
         | Up of TimeSpan * Options list
@@ -117,11 +118,16 @@ module Parsing =
 
         map' f (name <&> spaces <&+> body')
 
+    let pauseOption: Parser<Options> =
+        let f _ = true
+        map' (f >> Options.ShouldPause) ((string' "--pause" <|> string' "-p") <+&> (pos spaces <|> end'))
+
     let options: Parser<Options list> =
         many (
             (spaces <&+> colorOption)
             <|> (spaces <&+> backgroundOption)
             <|> (spaces <&+> messageOption)
+            <|> (spaces <&+> pauseOption)
         )
 
     let downCommand: Parser<CommandAndOptions> =

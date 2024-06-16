@@ -17,7 +17,8 @@ let ``Command2.update 1`` () =
           Delay = TimeSpan.Zero
           Color = ""
           Background = ""
-          Message = "" }
+          Message = ""
+          ShouldPause = false }
 
     let updated = { seed with Color = "#65a2ac" }
     let expected = Command2.Down(updated)
@@ -42,7 +43,8 @@ let ``Command2.build' 1`` () =
           Delay = TimeSpan.Zero
           Color = "#ffffff"
           Background = "#65a2ac"
-          Message = "hey hey" }
+          Message = "hey hey"
+          ShouldPause = false }
         |> Command2.Down
 
     let actual: Command2 = Command2.build' seed
@@ -71,13 +73,15 @@ let ``Command2.withDelay 1`` () =
                 Delay = TimeSpan.Zero
                 Color = "#ffffff"
                 Background = "#65a2ac"
-                Message = "hey hey" }
+                Message = "hey hey"
+                ShouldPause = false }
           Command2.Up
               { Duration = TimeSpan(0, 2, 0)
                 Delay = TimeSpan(0, 5, 0)
                 Color = "#333333"
                 Background = "#ffffff"
-                Message = "hey" } ]
+                Message = "hey"
+                ShouldPause = false } ]
 
     let actual: Command2 list = seeds |> List.map Command2.build' |> withDelay
 
