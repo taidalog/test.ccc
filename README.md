@@ -25,11 +25,12 @@ ccc: customizable command countdown-timer.
 
 ## Options
 
-| Options                        | Feature                                                              |
-| ------------------------------ | -------------------------------------------------------------------- |
-| `--color\|-c <hex code>`       | Specifies text color. Default: `#333333`.                            |
-| `--background\|-bg <hex code>` | Specifies background color. Default: `#ffffff`.                      |
-| `--message\|-m <text>`         | Specifies message to show below the timer. Default: an empty string. |
+| Options                        | Feature                                                                                   |
+| ------------------------------ | ----------------------------------------------------------------------------------------- |
+| `--color\|-c <hex code>`       | Specifies text color. Default: `#333333`.                                                 |
+| `--background\|-bg <hex code>` | Specifies background color. Default: `#ffffff`.                                           |
+| `--message\|-m <text>`         | Specifies message to show below the timer. Default: an empty string.                      |
+| `--pause\|-p`                  | Specifies that the timer should stop when the time spesified with the command has passed. |
 
 ## Examples
 
@@ -43,31 +44,37 @@ Countdown for 5 minutes
 up 5:00
 ```
 
-Count up for 5 minutes
+Counts up for 5 minutes
 
 ```
 down 5:00 down 1:30
 ```
 
-Countdown for 5 minutes, then countdown for 1 minute and 30 seconds.
+Counts down for 5 minutes, then counts down for 1 minute and 30 seconds.
 
 ```
 down 5:00 --message hey
 ```
 
-Countdown for 5 minutes, with a message "hey" below the timer.
+Counts down for 5 minutes, with a message "hey" below the timer.
 
 ```
 down 5:00 --color #222266 --background #aaccff --message hello
 ```
 
-Countdown for 5 minutes, with the dark blue text, the pale blue background and a message "hello" below the timer.
+Counts down for 5 minutes, with the dark blue text, the pale blue background and a message "hello" below the timer.
 
 ```
 down 5:00 --message Presentation. up 120 -bg #aaccff -m Questions and answers. -c #222266
 ```
 
-Countdown for 5 minutes, with a message "Presentation." below the timer. Then count up for 120 seconds (2 minutes), with the dark blue text and the pale blue background and a message "Questions and answers.".
+Counts down for 5 minutes, with a message "Presentation." below the timer. Then counts up for 120 seconds (2 minutes), with the dark blue text and the pale blue background and a message "Questions and answers.".
+
+```
+down 5:00 --pause up 2:00
+```
+
+Counts down for 5 minutes, and then the timer pauses. Then starts counting up for 2 minutes when user restarts the timer.
 
 ## Keys
 
