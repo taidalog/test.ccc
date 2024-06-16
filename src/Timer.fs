@@ -73,7 +73,7 @@ module Timer' =
     let split (input: string) : string array =
         input
         |> fun x -> Regex.Split(x, "(?=down \d|up \d)")
-        |> Array.map (fun x -> x.Trim())
+        |> Array.map _.Trim()
         |> Array.filter (String.IsNullOrWhiteSpace >> not)
 
     let parse (input: string) =
@@ -216,9 +216,7 @@ module Timer' =
         | RunningStatus.Stopping ->
             state <-
                 { state with
-                    Stop =
-                        { state.Stop with
-                            StartTime = DateTime.Now }
+                    Stop.StartTime = DateTime.Now
                     RunningStatus = RunningStatus.Running }
 
             let f' = f state.Commands state.Stop.StartTime
@@ -270,9 +268,7 @@ module Timer' =
 
             state <-
                 { state with
-                    Stop =
-                        { state.Stop with
-                            Acc = state.Stop.Acc + (DateTime.Now - state.Stop.StartTime) }
+                    Stop.Acc = state.Stop.Acc + (DateTime.Now - state.Stop.StartTime)
                     RunningStatus = RunningStatus.Stopping }
         | _ -> ()
 

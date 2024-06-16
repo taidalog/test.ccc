@@ -85,7 +85,7 @@ module Parsing =
             |> List.rev
             |> List.map string
             |> String.concat ""
-            |> fun x -> x.Trim()
+            |> _.Trim()
             |> Options.Message
 
         map' f (name <&> spaces <&+> body)
@@ -112,7 +112,7 @@ module Parsing =
             |> List.rev
             |> List.map string
             |> String.concat ""
-            |> fun x -> x.Trim()
+            |> _.Trim()
             |> Options.Message
 
         map' f (name <&> spaces <&+> body')

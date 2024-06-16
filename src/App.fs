@@ -142,7 +142,7 @@ module App =
                     let tmp: Result<(Parsing.CommandAndOptions * Parsers.State), (string * Parsers.State)> array =
                         commandInput.value
                         |> fun x -> Regex.Split(x, "(?=down \d|up \d)")
-                        |> Array.map (fun x -> x.Trim())
+                        |> Array.map _.Trim()
                         |> Array.filter (String.IsNullOrWhiteSpace >> not)
                         |> Array.map (fun x -> Parsers.State(x, 0))
                         |> Array.map Parsing.command
