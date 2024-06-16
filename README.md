@@ -1,6 +1,6 @@
 # ccc
 
-Version 0.7.0
+Version 0.8.0
 
 [Japanese README](README.ja.md)
 
