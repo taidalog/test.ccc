@@ -234,7 +234,9 @@ module Timer' =
 
                                     // Pausing.
                                     if Command2.shouldPause h then
-                                        stop ()
+                                        // Skipping the pause option with the last command.
+                                        if List.length t > 0 then
+                                            stop ()
                                 else
                                     // The current command has NOT come to its end.
                                     let elapsedTime' = elapsedTime h state.Current.StartTime state.Current.Acc now
@@ -305,7 +307,9 @@ module Timer' =
 
                                 // Pausing.
                                 if Command2.shouldPause h then
-                                    stop ()
+                                    // Skipping the pause option with the last command.
+                                    if List.length t > 0 then
+                                        stop ()
                             else
                                 // The current command has NOT come to its end.
                                 let elapsedTime' = elapsedTime h state.Current.StartTime state.Current.Acc now
