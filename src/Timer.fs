@@ -26,6 +26,7 @@ module Timer' =
 
     type State =
         { Stop: TimeAcc
+          Current: TimeAcc
           IntervalId: int
           Commands: Command2 list
           WakeLock: JS.Promise<obj> option
@@ -41,6 +42,9 @@ module Timer' =
         { Stop =
             { StartTime = DateTime.MinValue
               Acc = TimeSpan.Zero }
+          Current =
+            { StartTime = DateTime.MinValue
+              Acc = TimeSpan.Zero }
           IntervalId = -1
           Commands = []
           WakeLock = None
@@ -48,6 +52,9 @@ module Timer' =
 
     let initState =
         { Stop =
+            { StartTime = DateTime.MinValue
+              Acc = TimeSpan.Zero }
+          Current =
             { StartTime = DateTime.MinValue
               Acc = TimeSpan.Zero }
           IntervalId = -1
@@ -139,6 +146,10 @@ module Timer' =
                             { initState.Stop with
                                 StartTime = DateTime.Now
                                 Acc = TimeSpan.Zero }
+                        Current =
+                            { initState.Stop with
+                                StartTime = DateTime.Now
+                                Acc = TimeSpan.Zero }
                         Commands = commands
                         WakeLock =
                             if WakeLockAPI.isSupported () then
@@ -217,6 +228,7 @@ module Timer' =
             state <-
                 { state with
                     Stop.StartTime = DateTime.Now
+                    Current.StartTime = DateTime.Now
                     RunningStatus = RunningStatus.Running }
 
             let f' = f state.Commands state.Stop.StartTime
@@ -266,9 +278,12 @@ module Timer' =
         | RunningStatus.Running ->
             clearInterval state.IntervalId
 
+            let now = DateTime.Now
+
             state <-
                 { state with
-                    Stop.Acc = state.Stop.Acc + (DateTime.Now - state.Stop.StartTime)
+                    Stop.Acc = state.Stop.Acc + (now - state.Stop.StartTime)
+                    Current.Acc = state.Current.Acc + (now - state.Current.StartTime)
                     RunningStatus = RunningStatus.Stopping }
         | _ -> ()
 
