@@ -92,12 +92,6 @@ module Parsing =
     //     map' f (name <&> spaces <&+> body)
 
     let messageOption: Parser<Options> =
-        let pos' (parser) =
-            fun (State(x, p)) ->
-                match parser (State(x, p)) with
-                | Ok _ -> Ok((), State(x, p))
-                | Error _ -> Error("Parsing failed.", State(x, p))
-
         let name = string' "--message" <|> string' "-m"
 
         let body' =
@@ -110,7 +104,7 @@ module Parsing =
                 <|> string' "-p"
 
             let withoutTerminator = neg (spaces <&> names) <&> neg end'
-            let withTerminator = pos (spaces <&> names) <|> pos' end'
+            let withTerminator = pos (spaces <&> names) <|> pos end'
             (many (any <+&> withoutTerminator)) <&> (any <+&> withTerminator)
 
         let f (cs, c) =
