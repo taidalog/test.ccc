@@ -136,7 +136,8 @@ module App =
                                 (document.getElementById "validationArea").innerHTML <- msg
 
             (document.getElementById "inputArea").onsubmit <-
-                fun _ ->
+                fun e ->
+                    e.preventDefault ()
                     commandInput.blur ()
 
                     let tmp: Result<(Parsing.CommandAndOptions * Parsers.State), (string * Parsers.State)> array =
@@ -168,13 +169,14 @@ module App =
 
                     //commandInput.value |> splitInput' |> Array.map parse |> Array.toList |> start
                     start ()
-                    false
 
             // help window
             [ "helpButton"; "helpClose" ]
             |> List.iter (fun x ->
                 (document.getElementById x :?> HTMLButtonElement).onclick <-
-                    fun _ -> (document.getElementById "helpWindow").classList.toggle "active")
+                    fun _ ->
+                        (document.getElementById "helpWindow").classList.toggle "active" |> ignore
+                        ())
 
             // information policy window
             (document.getElementById "informationPolicyLink").onclick <-
