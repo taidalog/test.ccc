@@ -1,4 +1,4 @@
-// ccc Version 0.8.0
+// ccc Version 0.9.0
 // https://github.com/taidalog/ccc
 // Copyright (c) 2023-2024 taidalog
 // This software is licensed under the MIT License.
@@ -190,6 +190,13 @@ let ``messageOption 2`` () =
         Ok(Options.Message "hey hey", State("--message hey hey --color #65a2ac", 17))
 
     let actual = messageOption (State("--message hey hey --color #65a2ac", 0))
+    Assert.Equal(expected, actual)
+
+[<Fact>]
+let ``messageOption 3`` () =
+    let expected = Ok(Options.Message "hey hey", State("--message hey hey --pause", 17))
+
+    let actual = messageOption (State("--message hey hey --pause", 0))
     Assert.Equal(expected, actual)
 
 [<Fact>]
