@@ -13,14 +13,16 @@ module Command2 =
           Color: string
           Background: string
           Message: string
-          ShouldPause: bool }
+          ShouldPause: bool
+          Alarm: string }
 
     type UpCommand =
         { Duration: TimeSpan
           Color: string
           Background: string
           Message: string
-          ShouldPause: bool }
+          ShouldPause: bool
+          Alarm: string }
 
     [<StructuredFormatDisplay("{DisplayText}")>]
     type Command2 =
@@ -30,9 +32,9 @@ module Command2 =
         override this.ToString() =
             match this with
             | Command2.Down v ->
-                $"Countdown for %s{string v.Duration}, color: %s{v.Color}; background-color: %s{v.Background}; message: %s{v.Message}; ShouldPause: %b{v.ShouldPause}"
+                $"Countdown for %s{string v.Duration}, color: %s{v.Color}; background-color: %s{v.Background}; message: %s{v.Message}; ShouldPause: %b{v.ShouldPause}; Alarm: %s{v.Alarm}"
             | Command2.Up v ->
-                $"Countup for %s{string v.Duration}, color: %s{v.Color}; background-color: %s{v.Background}; message: %s{v.Message}; ShouldPause: %b{v.ShouldPause}"
+                $"Countup for %s{string v.Duration}, color: %s{v.Color}; background-color: %s{v.Background}; message: %s{v.Message}; ShouldPause: %b{v.ShouldPause}; Alarm: %s{v.Alarm}"
 
         member this.DisplayText = this.ToString()
 
@@ -61,19 +63,26 @@ module Command2 =
         | Command2.Down v -> v.ShouldPause
         | Command2.Up v -> v.ShouldPause
 
+    let alarm (x: Command2) : string =
+        match x with
+        | Command2.Down v -> v.Alarm
+        | Command2.Up v -> v.Alarm
+
     let defaultDown: DownCommand =
         { Duration = TimeSpan.Zero
           Color = ""
           Background = ""
           Message = ""
-          ShouldPause = false }
+          ShouldPause = false
+          Alarm = "" }
 
     let defaultUp: UpCommand =
         { Duration = TimeSpan.Zero
           Color = ""
           Background = ""
           Message = ""
-          ShouldPause = false }
+          ShouldPause = false
+          Alarm = "" }
 
     let update (command: Command2) (options: Parsing.Options) : Command2 =
         match command with
@@ -83,6 +92,7 @@ module Command2 =
             | Parsing.Options.Background v -> { d with Background = v }
             | Parsing.Options.Message v -> { d with Message = v }
             | Parsing.Options.ShouldPause v -> { d with ShouldPause = v }
+            | Parsing.Options.Alarm v -> { d with Alarm = v }
             |> Command2.Down
         | Command2.Up u ->
             match options with
@@ -90,6 +100,7 @@ module Command2 =
             | Parsing.Options.Background v -> { u with Background = v }
             | Parsing.Options.Message v -> { u with Message = v }
             | Parsing.Options.ShouldPause v -> { u with ShouldPause = v }
+            | Parsing.Options.Alarm v -> { u with Alarm = v }
             |> Command2.Up
 
     let build' (x: Parsing.CommandAndOptions) : Command2 =
