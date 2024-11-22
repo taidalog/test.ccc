@@ -104,15 +104,18 @@ main>form {
     background-color: var(--text-color);
     border-radius: 10px;
     padding: 0.5rem 0.5rem 0.5rem 1rem;
+    display: flex;
+    flex-direction: row;
+    gap: 0.5rem;
 }
 
 main>form>input {
     font-family: 'Noto Sans Mono', monospace;
     font-size: 1.25rem;
-    width: calc(100% - 1.5rem);
     color: var(--background-color);
     background-color: var(--text-color);
     border: none;
+    flex-grow: 1;
 }
 
 @media (max-width: 799px) {
@@ -126,8 +129,6 @@ main>form>input:focus {
 }
 
 main>form>label {
-    font-family: 'Noto Sans Mono', monospace;
-    margin-right: 0.5rem;
     user-select: none;
     -ms-user-select: none;
     -moz-user-select: none;
