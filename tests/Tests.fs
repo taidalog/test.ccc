@@ -18,7 +18,8 @@ let ``Command2.update 1`` () =
           Color = ""
           Background = ""
           Message = ""
-          ShouldPause = false }
+          ShouldPause = false
+          Alarm = "" }
 
     let updated = { seed with Color = "#65a2ac" }
     let expected = Command2.Down(updated)
@@ -44,7 +45,8 @@ let ``Command2.build' 1`` () =
           Color = "#ffffff"
           Background = "#65a2ac"
           Message = "hey hey"
-          ShouldPause = false }
+          ShouldPause = false
+          Alarm = "" }
         |> Command2.Down
 
     let actual: Command2 = Command2.build' seed
