@@ -234,12 +234,9 @@ module Timer' =
 
                                     // Playing alarm.
                                     match alarm h with
-                                    | "bell" ->
-                                        let audio = document.getElementById "bell" :?> HTMLAudioElement
-                                        audio.currentTime <- 0
-                                        audio.play ()
-                                    | "beep" ->
-                                        let audio = document.getElementById "beep" :?> HTMLAudioElement
+                                    | "bell"
+                                    | "beep" as x ->
+                                        let audio = document.getElementById x :?> HTMLAudioElement
                                         audio.currentTime <- 0
                                         audio.play ()
                                     | _ -> ()
@@ -319,12 +316,9 @@ module Timer' =
 
                                 // Playing alarm.
                                 match alarm h with
-                                | "bell" ->
-                                    let audio = document.getElementById "bell" :?> HTMLAudioElement
-                                    audio.currentTime <- 0
-                                    audio.play ()
-                                | "beep" ->
-                                    let audio = document.getElementById "beep" :?> HTMLAudioElement
+                                | "bell"
+                                | "beep" as x ->
+                                    let audio = document.getElementById x :?> HTMLAudioElement
                                     audio.currentTime <- 0
                                     audio.play ()
                                 | _ -> ()
