@@ -482,3 +482,9 @@ $RECYCLE.BIN/
 
 # Vim temporary swap files
 *.swp
+
+# Fable generated files
+.fable
+*.fs.js
+bundle.js
+temp/**
