@@ -232,6 +232,18 @@ module Timer' =
                                     |> timeSpanToDisplay
                                     |> fun x -> (document.getElementById "timerArea").innerHTML <- x
 
+                                    // Playing alarm.
+                                    match alarm h with
+                                    | "bell" ->
+                                        let audio = document.getElementById "bell" :?> HTMLAudioElement
+                                        audio.currentTime <- 0
+                                        audio.play ()
+                                    | "beep" ->
+                                        let audio = document.getElementById "beep" :?> HTMLAudioElement
+                                        audio.currentTime <- 0
+                                        audio.play ()
+                                    | _ -> ()
+
                                     // Pausing.
                                     if Command2.shouldPause h then
                                         // Skipping the pause option with the last command.
@@ -304,6 +316,18 @@ module Timer' =
                                 | Command2.Up v -> v.Duration
                                 |> timeSpanToDisplay
                                 |> fun x -> (document.getElementById "timerArea").innerHTML <- x
+
+                                // Playing alarm.
+                                match alarm h with
+                                | "bell" ->
+                                    let audio = document.getElementById "bell" :?> HTMLAudioElement
+                                    audio.currentTime <- 0
+                                    audio.play ()
+                                | "beep" ->
+                                    let audio = document.getElementById "beep" :?> HTMLAudioElement
+                                    audio.currentTime <- 0
+                                    audio.play ()
+                                | _ -> ()
 
                                 // Pausing.
                                 if Command2.shouldPause h then
