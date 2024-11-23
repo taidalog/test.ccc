@@ -170,6 +170,18 @@ module App =
                     //commandInput.value |> splitInput' |> Array.map parse |> Array.toList |> start
                     start ()
 
+            let startButton = (document.getElementById "startButton")
+            startButton.title <- "開始 (Enter)"
+            startButton.onclick <- fun _ -> start ()
+            let pauseButton = (document.getElementById "pauseButton")
+            pauseButton.title <- "一時停止 (Escape)"
+            pauseButton.onclick <- fun _ -> stop ()
+            let stopButton = (document.getElementById "stopButton")
+            stopButton.title <- "停止 (Delete)"
+            stopButton.onclick <- fun _ -> reset ()
+            let helpButton = (document.getElementById "helpButton")
+            helpButton.title <- "ヘルプ (?)"
+
             // help window
             [ "helpButton"; "helpClose" ]
             |> List.iter (fun x ->

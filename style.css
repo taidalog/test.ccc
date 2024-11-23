@@ -87,8 +87,23 @@ header {
     justify-content: space-between;
 }
 
+header>h1,
 header>div {
     margin-top: auto;
+}
+
+header>div {
+    display: flex;
+    gap: 0.75rem;
+}
+
+header span.material-symbols-outlined {
+    cursor: pointer;
+}
+
+header span.material-symbols-outlined:hover {
+    font-variation-settings:
+        'FILL' 1
 }
 
 main {
@@ -243,11 +258,6 @@ div.help-window a {
 
 div.help-window a:visited {
     color: var(--a-visited-color);
-}
-
-span.material-symbols-outlined:hover {
-    font-variation-settings:
-        'FILL' 1
 }
 
 span.material-symbols-outlined.help-close:hover {
