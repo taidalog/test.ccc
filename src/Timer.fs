@@ -1,4 +1,4 @@
-// ccc Version 0.9.1
+// ccc Version 0.10.0
 // https://github.com/taidalog/ccc
 // Copyright (c) 2023-2024 taidalog
 // This software is licensed under the MIT License.
@@ -232,6 +232,15 @@ module Timer' =
                                     |> timeSpanToDisplay
                                     |> fun x -> (document.getElementById "timerArea").innerHTML <- x
 
+                                    // Playing alarm.
+                                    match alarm h with
+                                    | "bell"
+                                    | "beep" as x ->
+                                        let audio = document.getElementById x :?> HTMLAudioElement
+                                        audio.currentTime <- 0
+                                        audio.play ()
+                                    | _ -> ()
+
                                     // Pausing.
                                     if Command2.shouldPause h then
                                         // Skipping the pause option with the last command.
@@ -304,6 +313,15 @@ module Timer' =
                                 | Command2.Up v -> v.Duration
                                 |> timeSpanToDisplay
                                 |> fun x -> (document.getElementById "timerArea").innerHTML <- x
+
+                                // Playing alarm.
+                                match alarm h with
+                                | "bell"
+                                | "beep" as x ->
+                                    let audio = document.getElementById x :?> HTMLAudioElement
+                                    audio.currentTime <- 0
+                                    audio.play ()
+                                | _ -> ()
 
                                 // Pausing.
                                 if Command2.shouldPause h then

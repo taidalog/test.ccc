@@ -1,4 +1,4 @@
-// ccc Version 0.9.1
+// ccc Version 0.10.0
 // https://github.com/taidalog/ccc
 // Copyright (c) 2023-2024 taidalog
 // This software is licensed under the MIT License.
@@ -169,6 +169,18 @@ module App =
 
                     //commandInput.value |> splitInput' |> Array.map parse |> Array.toList |> start
                     start ()
+
+            let startButton = (document.getElementById "startButton")
+            startButton.title <- "開始 (Enter)"
+            startButton.onclick <- fun _ -> start ()
+            let pauseButton = (document.getElementById "pauseButton")
+            pauseButton.title <- "一時停止 (Escape)"
+            pauseButton.onclick <- fun _ -> stop ()
+            let stopButton = (document.getElementById "stopButton")
+            stopButton.title <- "停止 (Delete)"
+            stopButton.onclick <- fun _ -> reset ()
+            let helpButton = (document.getElementById "helpButton")
+            helpButton.title <- "ヘルプ (?)"
 
             // help window
             [ "helpButton"; "helpClose" ]

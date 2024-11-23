@@ -1,4 +1,4 @@
-// ccc Version 0.9.1
+// ccc Version 0.10.0
 // https://github.com/taidalog/ccc
 // Copyright (c) 2023-2024 taidalog
 // This software is licensed under the MIT License.
@@ -14,6 +14,7 @@ module Parsing =
         | Background of string
         | Message of string
         | ShouldPause of bool
+        | Alarm of string
 
     type CommandAndOptions =
         | Up of TimeSpan * Options list
@@ -121,12 +122,20 @@ module Parsing =
         let f _ = true
         map' (f >> Options.ShouldPause) ((string' "--pause" <|> string' "-p") <+&> (pos spaces <|> end'))
 
+    let alarmOption: Parser<Options> =
+        map'
+            Options.Alarm
+            ((string' "--alarm" <|> string' "-a") <&> spaces
+             <&+> (string' "bell" <|> string' "beep")
+             <+&> (pos spaces <|> end'))
+
     let options: Parser<Options list> =
         many (
             (spaces <&+> colorOption)
             <|> (spaces <&+> backgroundOption)
             <|> (spaces <&+> messageOption)
             <|> (spaces <&+> pauseOption)
+            <|> (spaces <&+> alarmOption)
         )
 
     let downCommand: Parser<CommandAndOptions> =

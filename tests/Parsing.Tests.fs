@@ -1,4 +1,4 @@
-// ccc Version 0.9.1
+// ccc Version 0.10.0
 // https://github.com/taidalog/ccc
 // Copyright (c) 2023-2024 taidalog
 // This software is licensed under the MIT License.
@@ -212,6 +212,54 @@ let ``pauseOption 2`` () =
     Assert.Equal(expected, actual)
 
 [<Fact>]
+let ``alarmOption 1`` () =
+    let expected = Ok(Options.Alarm "beep", State("--alarm beep", 12))
+    let actual = alarmOption (State("--alarm beep", 0))
+    Assert.Equal(expected, actual)
+
+[<Fact>]
+let ``alarmOption 2`` () =
+    let expected = Ok(Options.Alarm "beep", State("-a beep", 7))
+    let actual = alarmOption (State("-a beep", 0))
+    Assert.Equal(expected, actual)
+
+[<Fact>]
+let ``alarmOption 3`` () =
+    let expected = Ok(Options.Alarm "bell", State("--alarm bell", 12))
+    let actual = alarmOption (State("--alarm bell", 0))
+    Assert.Equal(expected, actual)
+
+[<Fact>]
+let ``alarmOption 4`` () =
+    let expected = Ok(Options.Alarm "bell", State("-a bell", 7))
+    let actual = alarmOption (State("-a bell", 0))
+    Assert.Equal(expected, actual)
+
+[<Fact>]
+let ``alarmOption 5`` () =
+    let expected = Error("Parsing failed.", State("-alarm bell", 0))
+    let actual = alarmOption (State("-alarm bell", 0))
+    Assert.Equal(expected, actual)
+
+[<Fact>]
+let ``alarmOption 6`` () =
+    let expected = Error("Parsing failed.", State("--a bell", 0))
+    let actual = alarmOption (State("--a bell", 0))
+    Assert.Equal(expected, actual)
+
+[<Fact>]
+let ``alarmOption 7`` () =
+    let expected = Error("Position exceeded input length.", State("--alarm", 0))
+    let actual = alarmOption (State("--alarm", 0))
+    Assert.Equal(expected, actual)
+
+[<Fact>]
+let ``alarmOption 8`` () =
+    let expected = Error("Position exceeded input length.", State("-a", 0))
+    let actual = alarmOption (State("-a", 0))
+    Assert.Equal(expected, actual)
+
+[<Fact>]
 let ``downCommand 1`` () =
     let expected =
         Ok(CommandAndOptions.Down(TimeSpan(0, 5, 0), [ Options.Message "hey" ]), State("down 5:00 -m hey", 16))
@@ -276,6 +324,26 @@ let ``downCommand 4`` () =
     Assert.Equal(expected, actual)
 
 [<Fact>]
+let ``downCommand 5`` () =
+    let expected =
+        Ok(
+            CommandAndOptions.Down(
+                TimeSpan(0, 5, 0),
+                [ Options.Message "hey hey"
+                  Options.Color "#ffffff"
+                  Options.Background "#65a2ac"
+                  Options.ShouldPause true
+                  Options.Alarm "bell" ]
+            ),
+            State("down 5:00 --message hey hey --color #ffffff --background #65a2ac --pause --alarm bell", 85)
+        )
+
+    let actual =
+        downCommand (State("down 5:00 --message hey hey --color #ffffff --background #65a2ac --pause --alarm bell", 0))
+
+    Assert.Equal(expected, actual)
+
+[<Fact>]
 let ``upCommand 1`` () =
     let expected =
         Ok(CommandAndOptions.Up(TimeSpan(0, 5, 0), [ Options.Message "hey" ]), State("up 5:00 -m hey", 14))
@@ -336,6 +404,26 @@ let ``upCommand 4`` () =
 
     let actual =
         upCommand (State("up 5:00 --message hey hey --color #ffffff --background #65a2ac --pause", 0))
+
+    Assert.Equal(expected, actual)
+
+[<Fact>]
+let ``upCommand 5`` () =
+    let expected =
+        Ok(
+            CommandAndOptions.Up(
+                TimeSpan(0, 5, 0),
+                [ Options.Message "hey hey"
+                  Options.Color "#ffffff"
+                  Options.Background "#65a2ac"
+                  Options.ShouldPause true
+                  Options.Alarm "bell" ]
+            ),
+            State("up 5:00 --message hey hey --color #ffffff --background #65a2ac --pause --alarm bell", 83)
+        )
+
+    let actual =
+        upCommand (State("up 5:00 --message hey hey --color #ffffff --background #65a2ac --pause --alarm bell", 0))
 
     Assert.Equal(expected, actual)
 

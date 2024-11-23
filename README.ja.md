@@ -1,6 +1,6 @@
 # ccc
 
-Version 0.9.1
+Version 0.10.0
 
 [English README](README.md)
 
@@ -31,6 +31,7 @@ ccc: customizable command countdown-timer.
 | `--background\|-bg <hex code>` | 背景色を指定する。デフォルトは `#ffffff`。                         |
 | `--message\|-m <text>`         | タイマーの下に表示するメッセージを指定する。デフォルトは空文字。   |
 | `--pause\|-p`                  | 指定した時間が経過したのち、タイマーを一時停止することを指定する。 |
+| `--alarm\|-a beep\|bell`       | 指定した時間が経過したのち、指定したアラーム音を再生する。         |
 
 ## 例
 
@@ -75,6 +76,12 @@ down 5:00 --pause up 2:00
 ```
 
 5 分間カウントダウンし、一時停止する。その後、ユーザがタイマーを開始したら 2 分間カウントアップする。
+
+```
+down 5:00 --alarm bell up 2:00 -a beep
+```
+
+5 分間カウントダウンし、鈴の音を再生する。続けて 2 分間カウントアップし、ビープ音を再生する。
 
 ## キー操作
 
