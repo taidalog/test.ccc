@@ -1,5 +1,5 @@
 <!--
-  ccc Version 0.9.1
+  ccc Version 0.10.0
   https://github.com/taidalog/ccc
   Copyright (c) 2023-2024 taidalog
   This software is licensed under the MIT License.
@@ -62,25 +62,34 @@
 
     gtag('config', 'G-M1K3JX5RWM');
   </script>
-  <script type="module" crossorigin src="/ccc/assets/index-Bm2vLMic.js"></script>
-  <link rel="stylesheet" crossorigin href="/ccc/assets/index-DFF7QK8k.css">
+  <script type="module" crossorigin src="/ccc/assets/index-BjCcw3Ik.js"></script>
+  <link rel="stylesheet" crossorigin href="/ccc/assets/index-CB2aiSZA.css">
 </head>
 
 <body>
   <header>
+    <h1 translate="no">ccc</h1>
     <div>
-      <h1 translate="no">ccc</h1>
-    </div>
-    <div>
+      <span id="startButton" class="material-symbols-outlined" translate="no">
+        play_arrow
+      </span>
+      <span id="pauseButton" class="material-symbols-outlined" translate="no">
+        pause
+      </span>
+      <span id="stopButton" class="material-symbols-outlined" translate="no">
+        stop
+      </span>
       <span id="helpButton" class="material-symbols-outlined help-button" translate="no">
         help
       </span>
     </div>
   </header>
+
   <main>
     <form id="inputArea">
       <label for="commandInput">&gt;</label><input type="text" id="commandInput">
     </form>
+
     <output id="validationArea" class="validation-area"></output>
     <div id="timerArea" class="timer-area"></div>
     <div id="messageArea" class="message-area"></div>
@@ -92,21 +101,53 @@
           close
         </span>
       </div>
-      <p><span translate="no">ccc: customizable command countdown-timer.</span></p>
-      <p>
-        コマンドを入力して使用する、カスタマイズ可能なカウントダウンタイマーです。プレゼンテーションなどに使えると思います。<br>
-      </p>
-      <p>
-        使い方
-      <ol>
-        <li>コマンドエリアにコマンドを入力する。</li>
-        <li><span translate="no">Enter</span>キーを押す。そうするとタイマーが起動する。<span translate="no">Escape</span>キーで一時停止、<span
-            translate="no">Delete</span>キーでリセットができる。</li>
-      </ol>
-      </p>
-      <p>
-        詳細は<a href="https://github.com/taidalog/ccc/blob/main/README.ja.md" target="_blank">README</a>を読んでください。
-      </p>
+      <div class="sections">
+        <section>
+          <h2><span translate="no">ccc</span></h2>
+          <span translate="no">ccc: customizable command countdown-timer.</span><br>
+          コマンドを入力して使用する、カスタマイズ可能なカウントダウンタイマーです。プレゼンテーションなどに使えると思います。
+        </section>
+        <section>
+          <h2>使い方</h2>
+          <ol>
+            <li>コマンドエリアにコマンドを入力する。</li>
+            <li><span translate="no">Enter</span>キーを押す。そうするとタイマーが起動する。<span translate="no">Escape</span>キーで一時停止、<span
+                translate="no">Delete</span>キーでリセットができる。</li>
+          </ol>
+          詳細は<a href="https://github.com/taidalog/ccc/blob/main/README.ja.md" target="_blank">README</a>を読んでください。
+        </section>
+        <section>
+          <h2>コマンド例</h2>
+          <dl>
+            <dt translate="no">down 5:00</dt>
+            <dd>5分間カウントダウンします。</dd>
+          </dl>
+          <dl>
+            <dt translate="no">up 1:30</dt>
+            <dd>5分間カウントアップします。</dd>
+          </dl>
+          <dl>
+            <dt translate="no">down 5:00 up 1:30</dt>
+            <dd>5分間カウントダウンしたあと1分30秒間カウントアップします。</dd>
+          </dl>
+          <dl>
+            <dt translate="no">down 5:00 --color #222266 --background #aaccff</dt>
+            <dd>5分間カウントダウンします。文字色は濃い青、背景色は淡い青です。</dd>
+          </dl>
+          <dl>
+            <dt translate="no">down 5:00 --color #222266 --background #aaccff --message hello</dt>
+            <dd>5分間カウントダウンします。文字色は濃い青、背景色は淡い青で、タイマーの下には「hello」と表示します。</dd>
+          </dl>
+          <dl>
+            <dt translate="no">down 5:00 --pause up 2:00</dt>
+            <dd>5分間カウントダウンし、一時停止します。その後、ユーザがタイマーを開始したら2分間カウントアップします。</dd>
+          </dl>
+          <dl>
+            <dt translate="no">down 5:00 --alarm bell up 2:00 --alarm beep</dt>
+            <dd>5分間カウントダウンし、鈴の音を再生します。続けて2分間カウントアップし、ビープ音を再生します。</dd>
+          </dl>
+        </section>
+      </div>
     </div>
 
     <div id="informationPolicyWindow" class="help-window">
@@ -142,25 +183,29 @@
       </ul>
     </div>
 
+    <audio id="beep" preload="auto">
+      <source src="/ccc/assets/beep-BP1N_phs.mp3" type="audio/mp3"><!-- © 2004-2018 On-Jin ～音人～ -->
+    </audio>
+
+    <audio id="bell" preload="auto">
+      <source src="/ccc/assets/bell-Ctv0TuN8.mp3" type="audio/mp3"><!-- © 2013-2023 効果音ラボ -->
+    </audio>
+
   </main>
+
   <footer>
-    <div>
-      <div class="footer-item" translate="no"><small>&copy; 2023-2024 <a
-            href="https://taidalog.github.io/">taidalog</a></small></div>
-      <div class="footer-item" translate="no"><small>
-          <a href="https://github.com/taidalog/ccc/releases">Version 0.9.1</a></small></div>
-      <div class="footer-item"><small><a href="https://github.com/taidalog/ccc/blob/main/README.ja.md"
-            target="_blank">READ ME</a></small></div>
-      <div class="footer-item"><small><a href="#" id="informationPolicyLink">情報の外部送信について</a></small></div>
-      <div class="footer-item"><small><a href="https://odaibako.net/u/taidalog">お題箱</a></small></div>
-      <div class="footer-item" translate="no"><small>
-          <a href="https://github.com/taidalog/ccc">Repository on GitHub</a></small></div>
-    </div>
-    <div>
-      <div class="footer-item"><small>Powered by <a id="footerFSharp" href="https://fsharp.org/" translate="no">F#</a>
-          and <a id="footerFable" href="https://fable.io" translate="no">Fable</a>.
-          Thank you!</small></div>
-    </div>
+    <small translate="no">&copy; 2023-2024 <a href="https://taidalog.github.io/">taidalog</a></small>
+    <small translate="no">
+      <a href="https://github.com/taidalog/ccc/releases">Version 0.10.0</a></small>
+    <small translate="no"><a href="https://github.com/taidalog/ccc/blob/main/README.ja.md"
+        target="_blank">README</a></small>
+    <small><a href="#" id="informationPolicyLink">情報の外部送信について</a></small>
+    <small><a href="https://odaibako.net/u/taidalog">お題箱</a></small>
+    <small>
+      <a href="https://github.com/taidalog/ccc">Repository on GitHub</a></small>
+    <small>Powered by <a id="footerFSharp" href="https://fsharp.org/" translate="no">F#</a>
+      and <a id="footerFable" href="https://fable.io" translate="no">Fable</a>.
+      Thank you!</small>
   </footer>
 </body>
 
