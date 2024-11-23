@@ -101,21 +101,53 @@
           close
         </span>
       </div>
-      <p><span translate="no">ccc: customizable command countdown-timer.</span></p>
-      <p>
-        コマンドを入力して使用する、カスタマイズ可能なカウントダウンタイマーです。プレゼンテーションなどに使えると思います。<br>
-      </p>
-      <p>
-        使い方
-      <ol>
-        <li>コマンドエリアにコマンドを入力する。</li>
-        <li><span translate="no">Enter</span>キーを押す。そうするとタイマーが起動する。<span translate="no">Escape</span>キーで一時停止、<span
-            translate="no">Delete</span>キーでリセットができる。</li>
-      </ol>
-      </p>
-      <p>
-        詳細は<a href="https://github.com/taidalog/ccc/blob/main/README.ja.md" target="_blank">README</a>を読んでください。
-      </p>
+      <div class="sections">
+        <section>
+          <h2><span translate="no">ccc</span></h2>
+          <span translate="no">ccc: customizable command countdown-timer.</span><br>
+          コマンドを入力して使用する、カスタマイズ可能なカウントダウンタイマーです。プレゼンテーションなどに使えると思います。
+        </section>
+        <section>
+          <h2>使い方</h2>
+          <ol>
+            <li>コマンドエリアにコマンドを入力する。</li>
+            <li><span translate="no">Enter</span>キーを押す。そうするとタイマーが起動する。<span translate="no">Escape</span>キーで一時停止、<span
+                translate="no">Delete</span>キーでリセットができる。</li>
+          </ol>
+          詳細は<a href="https://github.com/taidalog/ccc/blob/main/README.ja.md" target="_blank">README</a>を読んでください。
+        </section>
+        <section>
+          <h2>コマンド例</h2>
+          <dl>
+            <dt translate="no">down 5:00</dt>
+            <dd>5分間カウントダウンします。</dd>
+          </dl>
+          <dl>
+            <dt translate="no">up 1:30</dt>
+            <dd>5分間カウントアップします。</dd>
+          </dl>
+          <dl>
+            <dt translate="no">down 5:00 up 1:30</dt>
+            <dd>5分間カウントダウンしたあと1分30秒間カウントアップします。</dd>
+          </dl>
+          <dl>
+            <dt translate="no">down 5:00 --color #222266 --background #aaccff</dt>
+            <dd>5分間カウントダウンします。文字色は濃い青、背景色は淡い青です。</dd>
+          </dl>
+          <dl>
+            <dt translate="no">down 5:00 --color #222266 --background #aaccff --message hello</dt>
+            <dd>5分間カウントダウンします。文字色は濃い青、背景色は淡い青で、タイマーの下には「hello」と表示します。</dd>
+          </dl>
+          <dl>
+            <dt translate="no">down 5:00 --pause up 2:00</dt>
+            <dd>5分間カウントダウンし、一時停止します。その後、ユーザがタイマーを開始したら2分間カウントアップします。</dd>
+          </dl>
+          <dl>
+            <dt translate="no">down 5:00 --alarm bell up 2:00 --alarm beep</dt>
+            <dd>5分間カウントダウンし、鈴の音を再生します。続けて2分間カウントアップし、ビープ音を再生します。</dd>
+          </dl>
+        </section>
+      </div>
     </div>
 
     <div id="informationPolicyWindow" class="help-window">

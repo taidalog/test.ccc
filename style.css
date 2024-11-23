@@ -252,6 +252,12 @@ div.help-window.active {
     scrollbar-width: thin;
 }
 
+div.help-window.active>div.sections {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
 div.help-window a {
     color: var(--a-color);
 }
@@ -263,4 +269,8 @@ div.help-window a:visited {
 span.material-symbols-outlined.help-close:hover {
     color: var(--background-color);
     background-color: var(--text-color);
+}
+
+div.help-window dt {
+    font-family: 'Noto Sans Mono', monospace;
 }
