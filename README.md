@@ -25,12 +25,13 @@ ccc: customizable command countdown-timer.
 
 ## Options
 
-| Options                        | Feature                                                                                   |
-| ------------------------------ | ----------------------------------------------------------------------------------------- |
-| `--color\|-c <hex code>`       | Specifies text color. Default: `#333333`.                                                 |
-| `--background\|-bg <hex code>` | Specifies background color. Default: `#ffffff`.                                           |
-| `--message\|-m <text>`         | Specifies message to show below the timer. Default: an empty string.                      |
-| `--pause\|-p`                  | Specifies that the timer should stop when the time spesified with the command has passed. |
+| Options                        | Feature                                                                                                  |
+| ------------------------------ | -------------------------------------------------------------------------------------------------------- |
+| `--color\|-c <hex code>`       | Specifies text color. Default: `#333333`.                                                                |
+| `--background\|-bg <hex code>` | Specifies background color. Default: `#ffffff`.                                                          |
+| `--message\|-m <text>`         | Specifies message to show below the timer. Default: an empty string.                                     |
+| `--pause\|-p`                  | Specifies that the timer should stop when the time spesified with the command has passed.                |
+| `--alarm\|-a beep\|bell`       | Specifies that the timer should play an alarm sound when the time spesified with the command has passed. |
 
 ## Examples
 
@@ -75,6 +76,12 @@ down 5:00 --pause up 2:00
 ```
 
 Counts down for 5 minutes, and then the timer pauses. Then starts counting up for 2 minutes when user restarts the timer.
+
+```
+down 5:00 --alarm bell up 2:00 -a beep
+```
+
+Counts down for 5 minutes, and then plays the tinkle of a bell. Then counts up for 2 minutes and plays a beep sound.
 
 ## Keys
 
