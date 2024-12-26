@@ -182,6 +182,14 @@ module App =
             let helpButton = (document.getElementById "helpButton")
             helpButton.title <- "ヘルプ (?)"
 
+            let bellButton = (document.getElementById "bellButton")
+
+            bellButton.onclick <-
+                fun _ ->
+                    let audio = document.getElementById "bell" :?> HTMLAudioElement
+                    audio.currentTime <- 0
+                    audio.play ()
+
             // help window
             [ "helpButton"; "helpClose" ]
             |> List.iter (fun x ->
