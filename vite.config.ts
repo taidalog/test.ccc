@@ -2,7 +2,7 @@ import { defineConfig } from 'vite'
 
 // https://vitejs.dev/config/
 export default defineConfig({
-    base: '/ccc/',
+    base: '/test.ccc/',
     build: {
         outDir: 'docs',
         emptyOutDir: true
