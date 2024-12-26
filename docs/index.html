@@ -60,10 +60,14 @@
     function gtag() { dataLayer.push(arguments); }
     gtag('js', new Date());
 
-    gtag('config', 'G-M1K3JX5RWM');
+    if (window.location.hostname === "localhost") {
+      gtag('config', 'G-M1K3JX5RWM', { 'debug_mode': true });
+    } else {
+      gtag('config', 'G-M1K3JX5RWM');
+    }
   </script>
-  <script type="module" crossorigin src="/ccc/assets/index-BjCcw3Ik.js"></script>
-  <link rel="stylesheet" crossorigin href="/ccc/assets/index-CB2aiSZA.css">
+  <script type="module" crossorigin src="/test.ccc/assets/index-BjqOIbXz.js"></script>
+  <link rel="stylesheet" crossorigin href="/test.ccc/assets/index-CB2aiSZA.css">
 </head>
 
 <body>
@@ -78,6 +82,9 @@
       </span>
       <span id="stopButton" class="material-symbols-outlined" translate="no">
         stop
+      </span>
+      <span id="bellButton" class="material-symbols-outlined" translate="no">
+        music_note
       </span>
       <span id="helpButton" class="material-symbols-outlined help-button" translate="no">
         help
@@ -184,11 +191,11 @@
     </div>
 
     <audio id="beep" preload="auto">
-      <source src="/ccc/assets/beep-BP1N_phs.mp3" type="audio/mp3"><!-- © 2004-2018 On-Jin ～音人～ -->
+      <source src="/test.ccc/assets/beep-BP1N_phs.mp3" type="audio/mp3"><!-- © 2004-2018 On-Jin ～音人～ -->
     </audio>
 
     <audio id="bell" preload="auto">
-      <source src="/ccc/assets/bell-Ctv0TuN8.mp3" type="audio/mp3"><!-- © 2013-2023 効果音ラボ -->
+      <source src="/test.ccc/assets/bell-Ctv0TuN8.mp3" type="audio/mp3"><!-- © 2013-2023 効果音ラボ -->
     </audio>
 
   </main>
